@@ -19,5 +19,9 @@ export const httpGet = async <T>(path: string): Promise<T> => {
     throw new ApiError(`La solicitud falló con estado ${response.status}.`, response.status)
   }
 
-  return (await response.json()) as T
+  try {
+    return (await response.json()) as T
+  } catch {
+    throw new ApiError('La respuesta del servidor no es válida.')
+  }
 }

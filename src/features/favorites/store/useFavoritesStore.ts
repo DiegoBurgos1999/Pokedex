@@ -27,6 +27,10 @@ export const useFavoritesStore = defineStore('favorites', () => {
     favorites.value = favorites.value.filter((p) => p.id !== id)
   }
 
+  // A raw, unconfirmed toggle — it removes immediately, unlike the UI-facing
+  // flow in useFavoriteToggle, which routes removal through
+  // requestRemoval/confirmRemoval instead. Not used by any component; kept
+  // as a store-level primitive alongside addFavorite/removeFavorite.
   const toggleFavorite = (summary: PokemonSummary): void => {
     if (isFavorite(summary.id)) removeFavorite(summary.id)
     else addFavorite(summary)
@@ -46,8 +50,10 @@ export const useFavoritesStore = defineStore('favorites', () => {
   }
 
   return {
-    favorites,
-    pendingRemoval,
+    // Exposed read-only (via computed, not the raw ref) so consumers can't
+    // bypass addFavorite/removeFavorite with a direct push/reassignment.
+    favorites: computed(() => favorites.value),
+    pendingRemoval: computed(() => pendingRemoval.value),
     count,
     isFavorite,
     addFavorite,

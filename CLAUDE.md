@@ -58,7 +58,7 @@ Favoritos entry shows a live counter badge.
 | Framework    | Vue 3, Composition API, `<script setup>` |
 | Language     | TypeScript (strict)                      |
 | Build        | Vite                                     |
-| Routing      | Vue Router 4                             |
+| Routing      | Vue Router 5                             |
 | Server state | TanStack Vue Query                       |
 | Client state | Pinia (setup stores)                     |
 | Styling      | Tailwind CSS v4 + design tokens          |

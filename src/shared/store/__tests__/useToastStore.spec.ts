@@ -54,4 +54,12 @@ describe('useToastStore', () => {
 
     expect(store.toasts.map((t) => t.message)).toEqual(['primero', 'segundo'])
   })
+
+  it('does not stack a duplicate of an already-visible identical toast', () => {
+    const store = useToastStore()
+    store.show('Pikachu añadido a favoritos')
+    store.show('Pikachu añadido a favoritos')
+
+    expect(store.toasts).toHaveLength(1)
+  })
 })

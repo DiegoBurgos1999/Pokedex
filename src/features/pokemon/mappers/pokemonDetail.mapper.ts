@@ -1,6 +1,6 @@
 import type { AbilityDto, PokemonDto, PokemonSpeciesDto } from '../api/pokemonDto'
 import type { PokemonDetail } from '../model/pokemon.model'
-import { isKnownType, type PokemonType } from '../model/pokemonTypeTheme'
+import { toKnownType, type PokemonType } from '../model/pokemonTypeTheme'
 import { resolveSprite } from './resolveSprite'
 
 const byLanguage = <T extends { language: { name: string } }>(
@@ -43,7 +43,7 @@ export const toPokemonDetail = (
   id: dto.id,
   name: dto.name,
   sprite: resolveSprite(dto),
-  types: dto.types.map((t) => t.type.name).filter(isKnownType),
+  types: dto.types.map((t) => toKnownType(t.type.name)),
   weightKg: dto.weight / 10,
   heightM: dto.height / 10,
   category: resolveGenus(species),

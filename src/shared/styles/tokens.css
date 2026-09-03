@@ -57,6 +57,7 @@
   --color-checkbox-border: #d3d8e0; /* filter modal, unselected */
   --color-dot-inactive: #cdd4dd; /* pagination / onboarding dots */
   --color-scrollbar: #d6dae0;
+  --color-selection: #cfe4fb; /* ::selection background */
 
   --color-gender-male: #2d5bd8;
   --color-gender-female: #f4708f;
@@ -210,6 +211,8 @@
   --card-height: 150px;
   --control-height: 56px;
   --page-size: 12; /* items per "load more" batch */
+  --scrollbar-width: 10px;
+  --scrollbar-border-width: 3px;
 }
 
 /* -----------------------------------------------------------------
@@ -226,17 +229,17 @@
   }
 
   ::selection {
-    background: #cfe4fb;
+    background: var(--color-selection);
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
+    width: var(--scrollbar-width);
   }
 
   ::-webkit-scrollbar-thumb {
     background: var(--color-scrollbar);
     border-radius: var(--radius-pill);
-    border: 3px solid var(--color-canvas);
+    border: var(--scrollbar-border-width) solid var(--color-canvas);
   }
 
   /* Sprites are low-resolution PNGs; nearest-neighbour keeps them crisp. */

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import errorIllustration from '@/assets/illustrations/error-state.png'
 import BaseSkeleton from '@/shared/ui/BaseSkeleton.vue'
 import BaseSpinner from '@/shared/ui/BaseSpinner.vue'
 
@@ -35,7 +36,7 @@ withDefaults(
   },
 )
 
-const emit = defineEmits<{ loadMore: []; setPage: [page: number]; retry: [] }>()
+const emit = defineEmits<{ loadMore: []; retry: [] }>()
 </script>
 
 <template>
@@ -67,15 +68,12 @@ const emit = defineEmits<{ loadMore: []; setPage: [page: number]; retry: [] }>()
       </div>
 
       <div v-if="pageCount !== undefined" class="flex flex-col items-center gap-4 py-11">
-        <div class="flex items-center gap-2">
-          <button
+        <div class="flex items-center gap-2" aria-hidden="true">
+          <span
             v-for="n in pageCount"
             :key="n"
-            type="button"
-            :aria-label="`Ir a la página ${n}`"
             class="h-2 rounded-pill transition-[width,background-color] duration-fast"
             :class="n === page ? 'w-7.5 bg-brand' : 'w-2 bg-dot-inactive'"
-            @click="emit('setPage', n)"
           />
         </div>
         <p class="text-sm text-ink-subtle">
@@ -111,11 +109,7 @@ const emit = defineEmits<{ loadMore: []; setPage: [page: number]; retry: [] }>()
       v-else-if="state === 'error'"
       class="flex flex-col items-center justify-center gap-3 py-20 motion-safe:animate-[fade-up_0.4s_both]"
     >
-      <img
-        class="sprite h-45 w-45 object-contain opacity-35 grayscale"
-        src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/129.png"
-        alt=""
-      />
+      <img class="h-45 w-45 object-contain" :src="errorIllustration" alt="" />
       <h3 class="mt-2 text-2xl font-bold">{{ pokemonCopy.errorTitle }}</h3>
       <p class="max-w-md text-center text-base leading-relaxed text-ink-muted">
         {{ pokemonCopy.errorDescription }}

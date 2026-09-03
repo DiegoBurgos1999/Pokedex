@@ -62,6 +62,10 @@ const FALLBACK_TYPE: PokemonType = 'normal'
 export const isKnownType = (value: string): value is PokemonType =>
   POKEMON_TYPES.includes(value as PokemonType)
 
+/** Maps an unrecognized PokéAPI type (`stellar`, `unknown`) to the fallback theme instead of dropping it. */
+export const toKnownType = (value: string): PokemonType =>
+  isKnownType(value) ? value : FALLBACK_TYPE
+
 export const getTypeTheme = (type: string): PokemonTypeTheme =>
   THEMES[isKnownType(type) ? type : FALLBACK_TYPE]
 

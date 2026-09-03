@@ -29,6 +29,11 @@ export const useToastStore = defineStore('toast', () => {
     variant: ToastVariant = 'success',
     durationMs = DEFAULT_DURATION_MS,
   ): void => {
+    // Rapid identical actions (e.g. toggling the same favorite twice) would
+    // otherwise stack duplicate toasts, each with its own dismiss timer.
+    if (toasts.value.some((toast) => toast.message === message && toast.variant === variant)) {
+      return
+    }
     const id = nextId++
     toasts.value.push({ id, message, variant })
     setTimeout(() => dismiss(id), durationMs)

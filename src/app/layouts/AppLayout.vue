@@ -17,7 +17,7 @@ const favoritesStore = useFavoritesStore()
 
 // Desktop-first design: below 1024px the sidebar degrades to icon-only,
 // regardless of the user's manual collapse preference.
-const isNarrowViewport = useMediaQuery('(max-width: 1023px)')
+const { matches: isNarrowViewport } = useMediaQuery('(max-width: 1023px)')
 const collapsed = computed(() => ui.sidebarCollapsed || isNarrowViewport.value)
 
 const main = ref<HTMLElement | null>(null)

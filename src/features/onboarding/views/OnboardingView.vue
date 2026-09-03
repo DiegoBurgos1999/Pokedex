@@ -41,9 +41,9 @@ const next = (): void => {
           >
             <div class="flex h-75 items-center justify-center rounded-3xl bg-surface-tint">
               <img
-                class="sprite h-42.5 w-42.5 object-contain motion-safe:animate-[floaty_3.6s_ease-in-out_infinite]"
-                :src="item.sprite"
-                alt=""
+                class="h-60 w-60 object-contain motion-safe:animate-[floaty_3.6s_ease-in-out_infinite]"
+                :src="item.illustration"
+                :alt="item.title"
               />
             </div>
             <div>

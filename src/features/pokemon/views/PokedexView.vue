@@ -78,7 +78,6 @@ const onApplyFilters = (types: PokemonType[]): void => {
         :page="page"
         :page-count="pageCount"
         @load-more="loadMore"
-        @set-page="page = $event"
         @retry="retry"
       >
         <template #empty>

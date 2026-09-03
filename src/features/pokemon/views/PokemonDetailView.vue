@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
+import errorIllustration from '@/assets/illustrations/error-state.png'
 import FavoriteButton from '@/features/favorites/components/FavoriteButton.vue'
 import BaseCard from '@/shared/ui/BaseCard.vue'
 import BaseSkeleton from '@/shared/ui/BaseSkeleton.vue'
@@ -56,6 +57,7 @@ const heroGradient = computed(() =>
       v-else-if="state === 'error'"
       class="flex flex-col items-center justify-center gap-3 py-20"
     >
+      <img class="h-45 w-45 object-contain" :src="errorIllustration" alt="" />
       <h3 class="text-2xl font-bold">{{ pokemonCopy.errorTitle }}</h3>
       <p class="max-w-md text-center text-base leading-relaxed text-ink-muted">
         {{ pokemonCopy.errorDescription }}

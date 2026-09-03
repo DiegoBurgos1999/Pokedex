@@ -1,4 +1,4 @@
-import { nextTick, watch, type Ref } from 'vue'
+import { nextTick, onScopeDispose, watch, type Ref } from 'vue'
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -63,4 +63,10 @@ export function useFocusTrap(
     },
     { immediate: true },
   )
+
+  // The watcher above only removes the listener when `active` flips back to
+  // false. If the host component unmounts while the trap is still active
+  // (e.g. the dialog closes via a route change instead of its own toggle),
+  // that never happens — clean up unconditionally on scope disposal too.
+  onScopeDispose(() => document.removeEventListener('keydown', onKeydown))
 }

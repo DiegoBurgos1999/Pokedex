@@ -77,7 +77,7 @@ describe('PokemonList', () => {
     expect(wrapper.emitted('retry')).toHaveLength(1)
   })
 
-  it('emits loadMore and setPage', async () => {
+  it('emits loadMore when the button is clicked', async () => {
     const wrapper = mountList({
       state: 'ready',
       items: [bulbasaur],
@@ -86,11 +86,21 @@ describe('PokemonList', () => {
       hasMore: true,
     })
 
-    await wrapper.get('button[aria-label="Ir a la página 2"]').trigger('click')
-    expect(wrapper.emitted('setPage')?.[0]).toEqual([2])
-
     const loadMoreButton = wrapper.findAll('button').find((b) => b.text().includes('Ver más'))
     await loadMoreButton?.trigger('click')
     expect(wrapper.emitted('loadMore')).toHaveLength(1)
+  })
+
+  it('renders the page dots as non-interactive progress indicators', () => {
+    const wrapper = mountList({
+      state: 'ready',
+      items: [bulbasaur],
+      pageCount: 2,
+      page: 1,
+      hasMore: true,
+    })
+
+    expect(wrapper.find('button[aria-label="Ir a la página 2"]').exists()).toBe(false)
+    expect(wrapper.findAll('span.bg-dot-inactive, span.bg-brand')).toHaveLength(2)
   })
 })

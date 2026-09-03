@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { readonly, ref } from 'vue'
 
 /** In-memory only, like favorites — replays the onboarding flow on reload. */
 export const useOnboardingStore = defineStore('onboarding', () => {
@@ -9,5 +9,5 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     hasSeenOnboarding.value = true
   }
 
-  return { hasSeenOnboarding, markOnboardingSeen }
+  return { hasSeenOnboarding: readonly(hasSeenOnboarding), markOnboardingSeen }
 })

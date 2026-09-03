@@ -140,6 +140,24 @@ describe('usePokemonList', () => {
     expect(result.items.value).toHaveLength(14)
   })
 
+  it('does not surface loadMoreError when only the first batch partially fails', async () => {
+    fetchPokemonIndex.mockResolvedValue(
+      indexOf(Array.from({ length: 12 }, (_, i) => [i + 1, `p${i + 1}`] as [number, string])),
+    )
+    fetchPokemonDetail.mockImplementation((id: number) =>
+      id <= 7 ? Promise.resolve(dto(id, `p${id}`)) : Promise.reject(new Error('offline')),
+    )
+
+    const { result } = mountComposable(() => usePokemonList())
+    await flushPromises()
+
+    // Nobody has clicked "Ver más" yet — a partial failure in the very
+    // first batch must not show the "couldn't load more" copy.
+    expect(result.state.value).toBe('ready')
+    expect(result.loadMoreError.value).toBe(false)
+    expect(result.items.value).toHaveLength(7)
+  })
+
   it('goes to the full-page error state when nothing has ever loaded successfully', async () => {
     fetchPokemonIndex.mockResolvedValue(indexOf([[1, 'bulbasaur']]))
     fetchPokemonDetail.mockRejectedValue(new Error('offline'))

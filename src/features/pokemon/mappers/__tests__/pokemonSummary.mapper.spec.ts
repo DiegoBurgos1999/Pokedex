@@ -38,12 +38,12 @@ describe('toPokemonSummary', () => {
     expect(summary.sprite).toBe('x.png')
   })
 
-  it('drops types PokéAPI returns that this app does not recognize', () => {
+  it('falls back to "normal" for a type PokéAPI returns that this app does not recognize', () => {
     const summary = toPokemonSummary({
       ...basePokemon,
       types: [{ type: { name: 'electric', url: '' } }, { type: { name: 'stellar', url: '' } }],
     })
 
-    expect(summary.types).toEqual(['electric'])
+    expect(summary.types).toEqual(['electric', 'normal'])
   })
 })

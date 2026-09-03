@@ -101,10 +101,12 @@ export function usePokemonList() {
   // fail without every visible query having errored — some of the earlier,
   // already-cached ones still have data. That must not be silent: it's
   // surfaced as `loadMoreError` instead of the full-page error state, since
-  // the successfully loaded cards above it are still worth showing.
+  // the successfully loaded cards above it are still worth showing. Gated on
+  // `page > 1` so a partial failure *within* the first batch doesn't show
+  // "couldn't load more" copy before the user has ever clicked "Ver más".
   const hasAnyDetailError = computed(() => detailQueries.value.some((q) => q.isError))
   const loadMoreError = computed(
-    () => hasLoadedFirstBatch.value && !isDetailAllError.value && hasAnyDetailError.value,
+    () => page.value > 1 && !isDetailAllError.value && hasAnyDetailError.value,
   )
 
   const state = computed<PokemonListState>(() => {

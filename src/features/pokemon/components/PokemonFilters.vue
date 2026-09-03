@@ -82,6 +82,7 @@ const apply = (): void => {
             v-for="row in rows"
             :key="row.type"
             type="button"
+            :aria-pressed="row.selected"
             class="flex items-center justify-between gap-3 border-b border-[var(--color-surface-sunken)] py-3 font-sans text-base text-ink"
             @click="toggle(row.type)"
           >

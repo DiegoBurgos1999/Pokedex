@@ -9,7 +9,7 @@ import { useDebouncedValue } from '@/shared/composables/useDebouncedValue'
  */
 export function usePokemonSearch(delayMs = 300) {
   const query = ref('')
-  const debouncedQuery = useDebouncedValue(query, delayMs)
+  const { debounced: debouncedQuery } = useDebouncedValue(query, delayMs)
 
   return { query, debouncedQuery }
 }

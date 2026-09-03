@@ -3,9 +3,6 @@
 Vue 3 single-page application built on top of the public
 [PokéAPI](https://pokeapi.co/).
 
-Read [`CLAUDE.md`](./CLAUDE.md) before contributing. It documents the
-architecture, conventions and the decisions behind them.
-
 ## Requirements
 
 Node 22 (see `.nvmrc`) and pnpm.
@@ -39,11 +36,3 @@ src/app/    Application shell: router, providers, layouts
 src/features/   Feature modules, each owning its api, model, state and views
 src/shared/     Cross-feature primitives: http client, ui atoms, tokens
 ```
-
-## Status
-
-All screens in `CLAUDE.md`'s table are implemented against the live PokéAPI:
-splash, onboarding, Pokedex (search, type filters, pagination, all four list
-states), Pokémon detail (weaknesses, gender ratio, share-to-clipboard),
-favorites (in-memory, with remove confirmation) and the coming-soon
-placeholders for Regiones and Perfil.
