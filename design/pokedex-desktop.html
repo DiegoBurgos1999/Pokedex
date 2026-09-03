@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin:0; padding:0; background:#F5F6F8; }
+  * { box-sizing:border-box; }
+  a { color:#2D8CF0; text-decoration:none; }
+  a:hover { color:#1B6FCC; }
+  ::selection { background:#cfe4fb; }
+  @keyframes pbSpin { 0%{transform:rotate(0) translateY(0)} 50%{transform:rotate(180deg) translateY(-14px)} 100%{transform:rotate(360deg) translateY(0)} }
+  @keyframes pbPulse { 0%,100%{ transform:scale(1); opacity:.9 } 50%{ transform:scale(1.06); opacity:1 } }
+  @keyframes fadeUp { from{ opacity:0; transform:translateY(14px) } to{ opacity:1; transform:translateY(0) } }
+  @keyframes pop { from{ opacity:0; transform:translateY(18px) scale(.97) } to{ opacity:1; transform:translateY(0) scale(1) } }
+  @keyframes shimmer { 0%{ background-position:-420px 0 } 100%{ background-position:420px 0 } }
+  @keyframes floaty { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-10px) } }
+  .sk { background:linear-gradient(90deg,#ECEEF1 0%,#F6F7F9 40%,#ECEEF1 80%); background-size:420px 100%; animation:shimmer 1.25s linear infinite; }
+  .card-lift { transition:transform .28s cubic-bezier(.2,.8,.2,1), box-shadow .28s cubic-bezier(.2,.8,.2,1); }
+  .card-lift:hover { transform:translateY(-6px); box-shadow:0 22px 40px -18px rgba(20,30,50,.35), 0 4px 10px rgba(20,30,50,.06); }
+  .sprite { image-rendering:pixelated; }
+  ::-webkit-scrollbar { width:10px }
+  ::-webkit-scrollbar-thumb { background:#D6DAE0; border-radius:99px; border:3px solid #F5F6F8 }
+</style>
+</helmet>
+
+<div style="display:flex; height:100vh; min-height:760px; width:100%; background:#F5F6F8; font-family:Poppins, Helvetica, sans-serif; color:#16181D; overflow:hidden;">
+
+  <aside style="width:{{ sidebarW }}; flex:0 0 auto; background:#FFFFFF; box-shadow:6px 0 28px -18px rgba(20,30,50,.35); display:flex; flex-direction:column; padding:22px 16px; gap:26px; transition:width .32s cubic-bezier(.2,.8,.2,1); z-index:20;">
+    <div style="display:flex; align-items:center; gap:12px; min-height:44px;">
+      <button onClick="{{ toggleSidebar }}" style="width:44px; height:44px; flex:0 0 auto; border:none; border-radius:14px; background:#F2F4F7; color:#3A3F49; cursor:pointer; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; transition:background .2s;" style-hover="background:#E6EAF0">
+        <span style="display:block; width:18px; height:2px; border-radius:2px; background:currentColor;"></span>
+        <span style="display:block; width:18px; height:2px; border-radius:2px; background:currentColor;"></span>
+        <span style="display:block; width:18px; height:2px; border-radius:2px; background:currentColor;"></span>
+      </button>
+      <div style="display:flex; align-items:center; gap:10px; overflow:hidden; opacity:{{ labelOpacity }}; transition:opacity .2s;">
+        <div style="width:26px; height:26px; flex:0 0 auto; border-radius:50%; border:2px solid #16181D; background:linear-gradient(#EE2B2B 0 45%, #16181D 45% 55%, #FFFFFF 55% 100%); position:relative;">
+          <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:9px; height:9px; border-radius:50%; background:#fff; border:2px solid #16181D;"></div>
+        </div>
+        <span style="font-weight:700; font-size:17px; white-space:nowrap;">Pokédex</span>
+      </div>
+    </div>
+
+    <nav style="display:flex; flex-direction:column; gap:8px;">
+      <button onClick="{{ goPokedex }}" style="display:flex; align-items:center; gap:14px; padding:13px 14px; border:none; border-radius:16px; cursor:pointer; font-family:inherit; font-size:15px; font-weight:600; text-align:left; background:{{ nav.dexBg }}; color:{{ nav.dexColor }}; box-shadow:{{ nav.dexShadow }}; transition:background .22s, color .22s;">
+        <span style="width:24px; flex:0 0 auto; text-align:center; font-size:19px;">⌂</span>
+        <span style="white-space:nowrap; opacity:{{ labelOpacity }}; transition:opacity .18s;">Pokedex</span>
+      </button>
+      <button onClick="{{ goRegions }}" style="display:flex; align-items:center; gap:14px; padding:13px 14px; border:none; border-radius:16px; cursor:pointer; font-family:inherit; font-size:15px; font-weight:600; text-align:left; background:{{ nav.regBg }}; color:{{ nav.regColor }}; box-shadow:{{ nav.regShadow }}; transition:background .22s, color .22s;">
+        <span style="width:24px; height:20px; flex:0 0 auto; background-image:url(icons/regiones.png); background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span>
+        <span style="white-space:nowrap; opacity:{{ labelOpacity }}; transition:opacity .18s;">Regiones</span>
+      </button>
+      <button onClick="{{ goFavorites }}" style="display:flex; align-items:center; gap:14px; padding:13px 14px; border:none; border-radius:16px; cursor:pointer; font-family:inherit; font-size:15px; font-weight:600; text-align:left; background:{{ nav.favBg }}; color:{{ nav.favColor }}; box-shadow:{{ nav.favShadow }}; transition:background .22s, color .22s;">
+        <span style="width:24px; height:20px; flex:0 0 auto; background-image:url(icons/favoritos.png); background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span>
+        <span style="white-space:nowrap; opacity:{{ labelOpacity }}; transition:opacity .18s;">Favoritos</span>
+        <span style="margin-left:auto; font-size:12px; font-weight:700; padding:2px 9px; border-radius:99px; background:#EE2B2B; color:#fff; opacity:{{ labelOpacity }};">{{ favCount }}</span>
+      </button>
+      <button onClick="{{ goProfile }}" style="display:flex; align-items:center; gap:14px; padding:13px 14px; border:none; border-radius:16px; cursor:pointer; font-family:inherit; font-size:15px; font-weight:600; text-align:left; background:{{ nav.proBg }}; color:{{ nav.proColor }}; box-shadow:{{ nav.proShadow }}; transition:background .22s, color .22s;">
+        <span style="width:24px; height:20px; flex:0 0 auto; background-image:url(icons/perfil.png); background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span>
+        <span style="white-space:nowrap; opacity:{{ labelOpacity }}; transition:opacity .18s;">Perfil</span>
+      </button>
+    </nav>
+
+    <div style="margin-top:auto; padding:16px; border-radius:18px; background:#F7F9FC; display:{{ tipDisplay }};">
+      <p style="margin:0 0 6px; font-size:13px; font-weight:700;">Datos de PokéAPI</p>
+      <p style="margin:0; font-size:12px; line-height:1.5; color:#6C737F;">151 Pokémon de la primera generación disponibles.</p>
+    </div>
+  </aside>
+
+  <main ref="{{ mainRef }}" style="flex:1 1 auto; overflow-y:auto; position:relative; padding:0 0 90px;">
+
+    <sc-if value="{{ isDex }}" hint-placeholder-val="{{ true }}">
+      <div style="position:sticky; top:0; z-index:12; background:rgba(245,246,248,.86); backdrop-filter:blur(10px); padding:30px 44px 18px;">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:22px;">
+          <div>
+            <p style="margin:0 0 4px; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#8A919C; font-weight:600;">Explora</p>
+            <h1 style="margin:0; font-size:34px; font-weight:700; letter-spacing:-.02em;">Pokedex</h1>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; flex:1 1 420px; min-width:0; justify-content:flex-end;">
+            <div style="display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #E4E7EC; border-radius:99px; padding:0 20px; height:56px; flex:1 1 300px; min-width:0; max-width:420px; box-shadow:0 10px 24px -20px rgba(20,30,50,.5);">
+              <span style="font-size:17px; color:#9AA1AC;">⌕</span>
+              <input value="{{ query }}" onChange="{{ onSearch }}" placeholder="Buscar Pókemon..." style="border:none; outline:none; background:transparent; font-family:inherit; font-size:15px; color:#16181D; width:100%;" />
+            </div>
+            <button onClick="{{ openFilter }}" style="height:56px; padding:0 22px; display:flex; align-items:center; gap:10px; border:1px solid #E4E7EC; background:#fff; border-radius:99px; cursor:pointer; font-family:inherit; font-size:15px; font-weight:600; color:#16181D; box-shadow:0 10px 24px -20px rgba(20,30,50,.5); transition:border-color .2s, transform .2s;" style-hover="border-color:#2D8CF0; transform:translateY(-2px)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16181D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z"></path></svg>
+              Filtros
+              <span style="font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; background:#2D8CF0; color:#fff; display:{{ filterBadge }};">{{ activeFilterCount }}</span>
+            </button>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <sc-for list="{{ activeChips }}" as="chip" hint-placeholder-count="0">
+            <button onClick="{{ chip.remove }}" style="display:flex; align-items:center; gap:8px; border:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; color:#fff; background:{{ chip.color }}; padding:7px 14px; border-radius:99px;">{{ chip.label }} <span style="opacity:.8">✕</span></button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="padding:8px 44px 0;">
+        <sc-if value="{{ isSkeleton }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:22px;">
+            <sc-for list="{{ skeletons }}" as="s" hint-placeholder-count="6">
+              <div style="height:150px; border-radius:24px; overflow:hidden; background:#fff; display:flex; box-shadow:0 12px 30px -24px rgba(20,30,50,.5);">
+                <div style="flex:1; padding:24px; display:flex; flex-direction:column; gap:12px;">
+                  <div class="sk" style="width:62px; height:12px; border-radius:99px;"></div>
+                  <div class="sk" style="width:70%; height:22px; border-radius:8px;"></div>
+                  <div style="display:flex; gap:8px; margin-top:auto;">
+                    <div class="sk" style="width:88px; height:26px; border-radius:99px;"></div>
+                    <div class="sk" style="width:88px; height:26px; border-radius:99px;"></div>
+                  </div>
+                </div>
+                <div class="sk" style="width:150px; flex:0 0 auto;"></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:22px;">
+            <sc-for list="{{ pageItems }}" as="p" hint-placeholder-count="0">
+              <article onClick="{{ p.open }}" class="card-lift" style="position:relative; height:150px; border-radius:24px; overflow:hidden; display:flex; cursor:pointer; background:{{ p.soft }}; box-shadow:0 14px 32px -26px rgba(20,30,50,.75); outline:{{ p.ring }}; outline-offset:3px; animation:fadeUp .45s both;">
+                <div style="flex:1 1 auto; padding:20px 22px; display:flex; flex-direction:column;">
+                  <span style="font-size:13px; font-weight:600; color:#3D4653; opacity:.75;">{{ p.num }}</span>
+                  <h3 style="margin:2px 0 0; font-size:26px; font-weight:700; letter-spacing:-.02em; color:#16181D;">{{ p.name }}</h3>
+                  <div style="display:flex; gap:8px; margin-top:auto;">
+                    <sc-for list="{{ p.chips }}" as="t" hint-placeholder-count="2">
+                      <span style="display:flex; align-items:center; gap:7px; background:{{ t.color }}; color:#fff; font-size:13px; font-weight:600; padding:5px 12px 5px 6px; border-radius:99px; box-shadow:0 6px 14px -8px rgba(0,0,0,.5);">
+                        <span style="width:20px; height:20px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center;">
+                          <span style="width:{{ t.gw }}; height:{{ t.gh }}; border-radius:{{ t.gRadius }}; background-color:{{ t.dotColor }}; background-image:{{ t.iconBg }}; background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span>
+                        </span>
+                        {{ t.label }}
+                      </span>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="width:170px; flex:0 0 auto; position:relative; background:{{ p.strong }}; display:flex; align-items:center; justify-content:center; border-radius:60px 24px 24px 60px;">
+                  <div role="img" aria-label="{{ p.name }}" style="width:104px; height:104px; background-image:{{ p.bg }}; background-size:contain; background-repeat:no-repeat; background-position:center; image-rendering:pixelated; filter:drop-shadow(0 8px 10px rgba(0,0,0,.25));"></div>
+                  <button onClick="{{ p.toggle }}" title="Favorito" style="position:absolute; top:12px; right:12px; width:38px; height:38px; border-radius:50%; border:2px solid rgba(255,255,255,.85); background-color:{{ p.favBg }}; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s, background-color .2s;" style-hover="transform:scale(1.12)"><span style="width:19px; height:17px; background-image:{{ p.heartBg }}; background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span></button>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+
+          <div style="display:flex; flex-direction:column; align-items:center; gap:16px; padding:44px 0 20px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <sc-for list="{{ dots }}" as="d" hint-placeholder-count="4">
+                <button onClick="{{ d.go }}" style="width:{{ d.w }}; height:8px; border-radius:99px; border:none; cursor:pointer; background:{{ d.bg }}; transition:width .25s, background .25s;"></button>
+              </sc-for>
+            </div>
+            <p style="margin:0; font-size:13px; color:#8A919C;">Mostrando {{ shownCount }} de {{ totalCount }} Pokémon</p>
+            <button onClick="{{ loadMore }}" style="display:{{ moreDisplay }}; padding:16px 42px; border:none; border-radius:99px; background:#2D8CF0; color:#fff; font-family:inherit; font-size:16px; font-weight:600; cursor:pointer; box-shadow:0 18px 30px -18px rgba(45,140,240,.9); transition:transform .22s, box-shadow .22s;" style-hover="transform:translateY(-3px); box-shadow:0 24px 38px -18px rgba(45,140,240,.95)">Ver más</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:90px 0; animation:fadeUp .4s both;">
+            <div style="width:120px; height:120px; border-radius:50%; border:8px solid #DFE3E9; background:linear-gradient(#EDF0F4 0 44%, #DFE3E9 44% 56%, #F7F9FB 56% 100%); position:relative; animation:floaty 3.4s ease-in-out infinite;">
+              <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:34px; height:34px; border-radius:50%; background:#fff; border:8px solid #DFE3E9;"></div>
+            </div>
+            <h3 style="margin:10px 0 0; font-size:24px; font-weight:700;">No encontramos Pokémon</h3>
+            <p style="margin:0; max-width:420px; text-align:center; font-size:15px; line-height:1.6; color:#6C737F;">Prueba con otro nombre o quita algunos filtros para ampliar la búsqueda.</p>
+            <button onClick="{{ clearAll }}" style="margin-top:10px; padding:14px 34px; border:none; border-radius:99px; background:#2D8CF0; color:#fff; font-family:inherit; font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 18px 30px -18px rgba(45,140,240,.9);">Limpiar búsqueda</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:80px 0; animation:fadeUp .4s both;">
+            <img class="sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/129.png" alt="" style="width:180px; height:180px; object-fit:contain; filter:grayscale(1) opacity(.35);" />
+            <h3 style="margin:8px 0 0; font-size:26px; font-weight:700;">Algo salió mal...</h3>
+            <p style="margin:0; max-width:460px; text-align:center; font-size:15px; line-height:1.6; color:#6C737F;">No pudimos cargar la información en este momento. Verifica tu conexión o intenta nuevamente más tarde.</p>
+            <button onClick="{{ retry }}" style="margin-top:12px; padding:16px 46px; border:none; border-radius:99px; background:#2D8CF0; color:#fff; font-family:inherit; font-size:16px; font-weight:600; cursor:pointer; box-shadow:0 18px 30px -18px rgba(45,140,240,.9); transition:transform .22s;" style-hover="transform:translateY(-3px)">Reintentar</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isFav }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:30px 44px 0;">
+        <button onClick="{{ goPokedex }}" style="display:flex; align-items:center; gap:8px; border:none; background:transparent; cursor:pointer; font-family:inherit; font-size:14px; font-weight:600; color:#6C737F; padding:0 0 18px;" style-hover="color:#2D8CF0">← Volver a Pokedex</button>
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:26px;">
+          <div>
+            <p style="margin:0 0 4px; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#8A919C; font-weight:600;">Tu colección</p>
+            <h1 style="margin:0; font-size:34px; font-weight:700; letter-spacing:-.02em;">Favoritos</h1>
+          </div>
+          <button onClick="{{ openFilter }}" style="height:56px; padding:0 22px; display:flex; align-items:center; gap:10px; border:1px solid #E4E7EC; background:#fff; border-radius:99px; cursor:pointer; font-family:inherit; font-size:15px; font-weight:600; color:#16181D; box-shadow:0 10px 24px -20px rgba(20,30,50,.5);" style-hover="border-color:#2D8CF0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16181D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z"></path></svg> Filtros</button>
+        </div>
+
+        <sc-if value="{{ favHasItems }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:22px;">
+            <sc-for list="{{ favItems }}" as="p" hint-placeholder-count="0">
+              <article onClick="{{ p.open }}" class="card-lift" style="position:relative; height:150px; border-radius:24px; overflow:hidden; display:flex; cursor:pointer; background:{{ p.soft }}; box-shadow:0 14px 32px -26px rgba(20,30,50,.75); outline:2px solid #EE2B2B; outline-offset:3px; animation:fadeUp .45s both;">
+                <div style="flex:1 1 auto; padding:20px 22px; display:flex; flex-direction:column;">
+                  <span style="font-size:13px; font-weight:600; color:#3D4653; opacity:.75;">{{ p.num }}</span>
+                  <h3 style="margin:2px 0 0; font-size:26px; font-weight:700; letter-spacing:-.02em; color:#16181D;">{{ p.name }}</h3>
+                  <div style="display:flex; gap:8px; margin-top:auto;">
+                    <sc-for list="{{ p.chips }}" as="t" hint-placeholder-count="2">
+                      <span style="display:flex; align-items:center; gap:7px; background:{{ t.color }}; color:#fff; font-size:13px; font-weight:600; padding:5px 12px 5px 6px; border-radius:99px;">
+                        <span style="width:20px; height:20px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center;">
+                          <span style="width:{{ t.gw }}; height:{{ t.gh }}; border-radius:{{ t.gRadius }}; background-color:{{ t.dotColor }}; background-image:{{ t.iconBg }}; background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span>
+                        </span>
+                        {{ t.label }}
+                      </span>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="width:170px; flex:0 0 auto; position:relative; background:{{ p.strong }}; display:flex; align-items:center; justify-content:center; border-radius:60px 24px 24px 60px;">
+                  <div role="img" aria-label="{{ p.name }}" style="width:104px; height:104px; background-image:{{ p.bg }}; background-size:contain; background-repeat:no-repeat; background-position:center; image-rendering:pixelated; filter:drop-shadow(0 8px 10px rgba(0,0,0,.25));"></div>
+                  <button onClick="{{ p.toggle }}" title="Quitar de favoritos" style="position:absolute; top:12px; right:12px; width:38px; height:38px; border-radius:50%; border:2px solid rgba(255,255,255,.85); background-color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s;" style-hover="transform:scale(1.12)"><span style="width:19px; height:17px; background-image:{{ p.heartBg }}; background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span></button>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ favIsEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:80px 0; animation:fadeUp .4s both;">
+            <div style="width:76px; height:68px; background-image:url(icons/favoritos.png); background-size:contain; background-repeat:no-repeat; background-position:center; opacity:.18; animation:floaty 3.4s ease-in-out infinite;"></div>
+            <h3 style="margin:4px 0 0; font-size:24px; font-weight:700;">Aún no tienes favoritos</h3>
+            <p style="margin:0; max-width:420px; text-align:center; font-size:15px; line-height:1.6; color:#6C737F;">Toca el corazón en cualquier Pokémon para guardarlo aquí y encontrarlo más rápido.</p>
+            <button onClick="{{ goPokedex }}" style="margin-top:10px; padding:15px 38px; border:none; border-radius:99px; background:#2D8CF0; color:#fff; font-family:inherit; font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 18px 30px -18px rgba(45,140,240,.9);">Explorar Pokedex</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:30px 44px 0; animation:fadeUp .35s both;">
+        <button onClick="{{ goBack }}" style="display:flex; align-items:center; gap:8px; border:none; background:transparent; cursor:pointer; font-family:inherit; font-size:14px; font-weight:600; color:#6C737F; padding:0 0 18px;" style-hover="color:#2D8CF0">← Volver al listado</button>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap:28px; align-items:start;">
+
+          <div style="position:relative; min-width:0; max-width:520px; border-radius:32px; overflow:hidden; background:{{ d.strong }}; min-height:420px; display:flex; align-items:center; justify-content:center; box-shadow:0 30px 60px -34px rgba(20,30,50,.8);">
+            <div style="position:absolute; top:-60px; right:-70px; width:420px; height:420px; border-radius:50% 50% 50% 8%; background:rgba(255,255,255,.22);"></div>
+            <div role="img" aria-label="{{ d.name }}" style="position:relative; width:250px; height:250px; background-image:{{ d.bg }}; background-size:contain; background-repeat:no-repeat; background-position:center; image-rendering:pixelated; filter:drop-shadow(0 18px 22px rgba(0,0,0,.3)); animation:floaty 4s ease-in-out infinite;"></div>
+            <button onClick="{{ d.toggle }}" title="{{ d.favLabel }}" style="position:absolute; top:20px; right:20px; width:50px; height:50px; border-radius:50%; border:2px solid rgba(255,255,255,.9); background-color:{{ d.favBg }}; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s;" style-hover="transform:scale(1.1)"><span style="width:26px; height:23px; background-image:{{ d.heartBg }}; background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span></button>
+          </div>
+
+          <div style="min-width:0; background:#FFFFFF; border-radius:32px; padding:38px 40px 42px; box-shadow:0 26px 54px -36px rgba(20,30,50,.6);">
+            <p style="margin:0 0 2px; font-size:15px; font-weight:600; color:#8A919C;">{{ d.num }}</p>
+            <h1 style="margin:0 0 16px; font-size:44px; font-weight:700; letter-spacing:-.03em;">{{ d.name }}</h1>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px;">
+              <sc-for list="{{ d.chips }}" as="t" hint-placeholder-count="0">
+                <span style="display:flex; align-items:center; gap:8px; background:{{ t.color }}; color:#fff; font-size:14px; font-weight:600; padding:7px 16px 7px 7px; border-radius:99px;">
+                  <span style="width:22px; height:22px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center;">
+                    <span style="width:{{ t.gw }}; height:{{ t.gh }}; border-radius:{{ t.gRadius }}; background-color:{{ t.dotColor }}; background-image:{{ t.iconBg }}; background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span>
+                  </span>
+                  {{ t.label }}
+                </span>
+              </sc-for>
+            </div>
+            <p style="margin:0 0 26px; font-size:16px; line-height:1.7; color:#4A5260; max-width:640px; text-wrap:pretty;">{{ d.desc }}</p>
+
+            <div style="height:1px; background:#EDEFF3; margin-bottom:26px;"></div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:18px; margin-bottom:30px;">
+              <div>
+                <p style="margin:0 0 8px; font-size:12px; font-weight:600; letter-spacing:.1em; color:#8A919C;">⚖ PESO</p>
+                <div style="border:1px solid #E4E7EC; border-radius:14px; padding:15px 0; text-align:center; font-size:19px; font-weight:600;">{{ d.weight }}</div>
+              </div>
+              <div>
+                <p style="margin:0 0 8px; font-size:12px; font-weight:600; letter-spacing:.1em; color:#8A919C;">↕ ALTURA</p>
+                <div style="border:1px solid #E4E7EC; border-radius:14px; padding:15px 0; text-align:center; font-size:19px; font-weight:600;">{{ d.height }}</div>
+              </div>
+              <div>
+                <p style="margin:0 0 8px; font-size:12px; font-weight:600; letter-spacing:.1em; color:#8A919C;">⊞ CATEGORÍA</p>
+                <div style="border:1px solid #E4E7EC; border-radius:14px; padding:15px 8px; text-align:center; font-size:16px; font-weight:600;">{{ d.cat }}</div>
+              </div>
+              <div>
+                <p style="margin:0 0 8px; font-size:12px; font-weight:600; letter-spacing:.1em; color:#8A919C;">✦ HABILIDAD</p>
+                <div style="border:1px solid #E4E7EC; border-radius:14px; padding:15px 8px; text-align:center; font-size:16px; font-weight:600;">{{ d.ability }}</div>
+              </div>
+            </div>
+
+            <sc-if value="{{ d.hasGender }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-bottom:30px; max-width:640px;">
+                <p style="margin:0 0 10px; font-size:12px; font-weight:600; letter-spacing:.14em; color:#8A919C; text-align:center;">GÉNERO</p>
+                <div style="height:10px; border-radius:99px; overflow:hidden; background:#F4708F; display:flex;">
+                  <div style="width:{{ d.maleWidth }}; background:#2D5BD8; transition:width .5s cubic-bezier(.2,.8,.2,1);"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:14px; color:#4A5260;">
+                  <span>♂ {{ d.malePct }}</span>
+                  <span>♀ {{ d.femalePct }}</span>
+                </div>
+              </div>
+            </sc-if>
+
+            <h2 style="margin:0 0 14px; font-size:24px; font-weight:700;">Debilidades</h2>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <sc-for list="{{ d.weak }}" as="t" hint-placeholder-count="0">
+                <span style="display:flex; align-items:center; gap:8px; background:{{ t.color }}; color:#fff; font-size:14px; font-weight:600; padding:7px 16px 7px 7px; border-radius:99px; box-shadow:0 8px 16px -10px rgba(0,0,0,.5);">
+                  <span style="width:22px; height:22px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center;">
+                    <span style="width:{{ t.gw }}; height:{{ t.gh }}; border-radius:{{ t.gRadius }}; background-color:{{ t.dotColor }}; background-image:{{ t.iconBg }}; background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span>
+                  </span>
+                  {{ t.label }}
+                </span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSoon }}" hint-placeholder-val="{{ false }}">
+      <div style="min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:120px 44px; animation:fadeUp .4s both;">
+        <div style="width:104px; height:104px; border-radius:50%; border:7px solid #C9CFD8; background:linear-gradient(#E7EBF0 0 44%, #C9CFD8 44% 56%, #FBFCFD 56% 100%); position:relative; animation:floaty 3.6s ease-in-out infinite;">
+          <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:30px; height:30px; border-radius:50%; background:#fff; border:7px solid #C9CFD8;"></div>
+        </div>
+        <h1 style="margin:14px 0 0; font-size:32px; font-weight:700;">{{ soonTitle }}</h1>
+        <p style="margin:0; max-width:440px; text-align:center; font-size:16px; line-height:1.6; color:#6C737F;">Próximamente. Estamos trabajando en esta sección; vuelve pronto para descubrirla.</p>
+        <button onClick="{{ goPokedex }}" style="margin-top:14px; padding:15px 38px; border:1px solid #E4E7EC; border-radius:99px; background:#fff; color:#16181D; font-family:inherit; font-size:15px; font-weight:600; cursor:pointer;" style-hover="border-color:#2D8CF0; color:#2D8CF0">Volver a Pokedex</button>
+      </div>
+    </sc-if>
+
+    <button onClick="{{ scrollTop }}" title="Volver al inicio" style="position:fixed; right:36px; bottom:34px; width:58px; height:58px; border-radius:50%; border:none; background:#2D8CF0; color:#fff; font-size:22px; cursor:pointer; z-index:15; display:{{ fabDisplay }}; align-items:center; justify-content:center; box-shadow:0 20px 34px -14px rgba(45,140,240,.85); animation:pop .3s both; transition:transform .22s;" style-hover="transform:translateY(-4px) scale(1.04)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6"></path><path d="M5.5 12.5L12 6l6.5 6.5"></path></svg></button>
+  </main>
+
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; inset:0; z-index:45; background:rgba(15,20,30,.5); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; padding:40px; animation:fadeUp .2s both;">
+      <div style="width:100%; max-width:440px; background:#FBFBFC; border-radius:28px; padding:34px 34px 30px; text-align:center; box-shadow:0 50px 90px -40px rgba(10,16,28,.7); animation:pop .28s cubic-bezier(.2,.8,.2,1) both;">
+        <div style="width:112px; height:112px; margin:0 auto 18px; border-radius:50%; background-color:{{ confirmSoft }}; display:flex; align-items:center; justify-content:center;">
+          <div style="width:82px; height:82px; background-image:{{ confirmBg }}; background-size:contain; background-repeat:no-repeat; background-position:center; image-rendering:pixelated;"></div>
+        </div>
+        <p style="margin:0 0 4px; font-size:13px; font-weight:600; color:#8A919C;">{{ confirmNum }}</p>
+        <h2 style="margin:0 0 10px; font-size:24px; font-weight:700;">¿Quitar a {{ confirmName }} de favoritos?</h2>
+        <p style="margin:0 0 26px; font-size:15px; line-height:1.6; color:#6C737F;">Dejará de aparecer en tu lista de favoritos. Podrás volver a agregarlo cuando quieras.</p>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <button onClick="{{ confirmYes }}" style="padding:16px 0; border:none; border-radius:99px; background:#EE2B2B; color:#fff; font-family:inherit; font-size:16px; font-weight:600; cursor:pointer; box-shadow:0 18px 30px -18px rgba(238,43,43,.9); transition:transform .2s;" style-hover="transform:translateY(-2px)">Sí, quitar de favoritos</button>
+          <button onClick="{{ confirmNo }}" style="padding:16px 0; border:none; border-radius:99px; background:#ECEEF1; color:#16181D; font-family:inherit; font-size:16px; font-weight:600; cursor:pointer;" style-hover="background:#E1E4E9">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showFilter }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; inset:0; z-index:40; background:rgba(15,20,30,.5); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; padding:40px; animation:fadeUp .22s both;">
+      <div style="width:100%; max-width:760px; background:#FBFBFC; border-radius:28px; box-shadow:0 50px 90px -40px rgba(10,16,28,.7); overflow:hidden; animation:pop .3s cubic-bezier(.2,.8,.2,1) both;">
+        <div style="padding:26px 34px 18px; display:flex; align-items:center; gap:18px;">
+          <button onClick="{{ closeFilter }}" style="width:42px; height:42px; border-radius:14px; border:none; background:#F1F3F6; color:#3A3F49; font-size:17px; cursor:pointer;" style-hover="background:#E6EAF0">✕</button>
+          <h2 style="margin:0 auto; font-size:26px; font-weight:700;">Filtra por tus preferencias</h2>
+          <div style="width:42px;"></div>
+        </div>
+        <div style="padding:0 34px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0 12px; border-bottom:1px solid #E7EAEF;">
+            <h3 style="margin:0; font-size:20px; font-weight:700;">Tipo</h3>
+            <span style="font-size:18px; color:#6C737F;">⌃</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:2px 28px; padding:14px 0 22px; max-height:320px; overflow-y:auto;">
+            <sc-for list="{{ typeRows }}" as="row" hint-placeholder-count="12">
+              <button onClick="{{ row.toggle }}" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 4px; border:none; background:transparent; cursor:pointer; font-family:inherit; font-size:16px; color:#16181D; border-bottom:1px solid #F0F2F5;">
+                <span style="display:flex; align-items:center; gap:10px;">
+                  <span style="width:{{ row.gw }}; height:{{ row.gh }}; border-radius:{{ row.gRadius }}; background-color:{{ row.dotColor }}; background-image:{{ row.iconBg }}; background-size:contain; background-repeat:no-repeat; background-position:center; display:block;"></span>
+                  {{ row.label }}
+                </span>
+                <span style="width:26px; height:26px; flex:0 0 auto; border-radius:7px; border:2px solid {{ row.boxBorder }}; background:{{ row.boxBg }}; color:#fff; font-size:14px; display:flex; align-items:center; justify-content:center;">{{ row.mark }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="padding:20px 34px 28px; border-top:1px solid #E7EAEF; display:flex; gap:14px;">
+          <button onClick="{{ applyFilter }}" style="flex:1; padding:17px 0; border:none; border-radius:99px; background:#2D8CF0; color:#fff; font-family:inherit; font-size:17px; font-weight:600; cursor:pointer; box-shadow:0 18px 30px -18px rgba(45,140,240,.9); transition:transform .2s;" style-hover="transform:translateY(-2px)">Aplicar</button>
+          <button onClick="{{ cancelFilter }}" style="flex:0 0 240px; padding:17px 0; border:none; border-radius:99px; background:#ECEEF1; color:#16181D; font-family:inherit; font-size:17px; font-weight:600; cursor:pointer;" style-hover="background:#E1E4E9">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showOnboarding }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; inset:0; z-index:50; background:rgba(15,20,30,.55); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; padding:48px; animation:fadeUp .25s both;">
+      <div style="width:100%; max-width:940px; background:#FBFBFC; border-radius:32px; box-shadow:0 60px 110px -40px rgba(10,16,28,.75); overflow:hidden; animation:pop .34s cubic-bezier(.2,.8,.2,1) both;">
+        <div style="overflow:hidden;">
+          <div style="display:flex; width:200%; transform:translateX({{ obShift }}); transition:transform .5s cubic-bezier(.2,.8,.2,1);">
+            <div style="width:50%; flex:0 0 50%; display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:40px; padding:56px 60px;">
+              <div style="display:flex; align-items:center; justify-content:center; background:#F1F5FA; border-radius:26px; height:300px;">
+                <img class="sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/1.gif" alt="" style="width:170px; height:170px; object-fit:contain; animation:floaty 3.6s ease-in-out infinite;" />
+              </div>
+              <div>
+                <p style="margin:0 0 10px; font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#2D8CF0;">Paso 1 de 2</p>
+                <h2 style="margin:0 0 16px; font-size:38px; line-height:1.15; font-weight:700; letter-spacing:-.02em;">Todos los Pokémon en un solo lugar</h2>
+                <p style="margin:0; font-size:16px; line-height:1.7; color:#6C737F;">Accede a una amplia lista de Pokémon de todas las generaciones creadas por Nintendo.</p>
+              </div>
+            </div>
+            <div style="width:50%; flex:0 0 50%; display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:40px; padding:56px 60px;">
+              <div style="display:flex; align-items:center; justify-content:center; background:#F1F5FA; border-radius:26px; height:300px;">
+                <img class="sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/showdown/25.gif" alt="" style="width:170px; height:170px; object-fit:contain; animation:floaty 3.6s ease-in-out infinite;" />
+              </div>
+              <div>
+                <p style="margin:0 0 10px; font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#2D8CF0;">Paso 2 de 2</p>
+                <h2 style="margin:0 0 16px; font-size:38px; line-height:1.15; font-weight:700; letter-spacing:-.02em;">Mantén tu Pokédex actualizada</h2>
+                <p style="margin:0; font-size:16px; line-height:1.7; color:#6C737F;">Regístrate y guarda tu perfil, Pokémon favoritos, configuraciones y mucho más en la aplicación.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:0 60px 46px; display:flex; flex-direction:column; align-items:center; gap:22px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button onClick="{{ obGo0 }}" style="width:{{ ob.w0 }}; height:8px; border-radius:99px; border:none; background:{{ ob.c0 }}; cursor:pointer; transition:width .3s, background .3s;"></button>
+            <button onClick="{{ obGo1 }}" style="width:{{ ob.w1 }}; height:8px; border-radius:99px; border:none; background:{{ ob.c1 }}; cursor:pointer; transition:width .3s, background .3s;"></button>
+          </div>
+          <button onClick="{{ obNext }}" style="width:100%; max-width:520px; padding:19px 0; border:none; border-radius:99px; background:#2D8CF0; color:#fff; font-family:inherit; font-size:18px; font-weight:600; cursor:pointer; box-shadow:0 22px 36px -18px rgba(45,140,240,.95); transition:transform .22s;" style-hover="transform:translateY(-3px)">{{ obLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showSplash }}" hint-placeholder-val="{{ true }}">
+    <div style="position:fixed; inset:0; z-index:60; background:#FAFBFC; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:34px;">
+      <div style="width:150px; height:150px; border-radius:50%; border:7px solid #16181D; background:linear-gradient(#EE2B2B 0 45%, #16181D 45% 55%, #FFFFFF 55% 100%); position:relative; animation:pbSpin 1.6s cubic-bezier(.5,.05,.5,.95) infinite;">
+        <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:44px; height:44px; border-radius:50%; background:#fff; border:7px solid #16181D;"></div>
+      </div>
+      <p style="margin:0; font-size:15px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#8A919C; animation:pbPulse 1.6s ease-in-out infinite;">Cargando Pokédex</p>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;flow&quot;,&quot;splash&quot;,&quot;onboarding&quot;,&quot;pokedex&quot;,&quot;detalle&quot;,&quot;favoritos&quot;,&quot;proximamente&quot;],&quot;default&quot;:&quot;flow&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;listState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;skeleton&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;collapsedMenu&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;perPage&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:12,&quot;min&quot;:6,&quot;max&quot;:24,&quot;step&quot;:6,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Listado&quot;}}">
+const TYPES = {
+  grass:{es:'Planta', color:'#5FBF5A', soft:'#DCEDBC', strong:'#7DC64F', icon:'icons/planta.png'},
+  poison:{es:'Veneno', color:'#A040A0', soft:'#E7CCE7', strong:'#B357B3', icon:'icons/veneno.png'},
+  fire:{es:'Fuego', color:'#F08030', soft:'#FBD3A6', strong:'#F79030', icon:'icons/fuego.png'},
+  water:{es:'Agua', color:'#3B9BE8', soft:'#C7E1F8', strong:'#4FA8EE'},
+  bug:{es:'Bicho', color:'#A8B820', soft:'#E4E8B5', strong:'#B9C63C'},
+  flying:{es:'Volador', color:'#8AA9E8', soft:'#DCE4F7', strong:'#9DB6EE'},
+  normal:{es:'Normal', color:'#9E9E86', soft:'#E6E6DC', strong:'#B3B39C'},
+  electric:{es:'Eléctrico', color:'#EFBE18', soft:'#FBEDB4', strong:'#F5D033'},
+  ground:{es:'Tierra', color:'#D9A84E', soft:'#F2E0BC', strong:'#E0B767'},
+  fairy:{es:'Hada', color:'#EE8FA5', soft:'#FAD9E1', strong:'#F2A2B4'},
+  fighting:{es:'Lucha', color:'#C03028', soft:'#EFC7C4', strong:'#CE5148'},
+  psychic:{es:'Psíquico', color:'#F85888', soft:'#FCD2DE', strong:'#FA7CA3'},
+  rock:{es:'Roca', color:'#B8A038', soft:'#E8DFB9', strong:'#C7B255'},
+  ice:{es:'Hielo', color:'#6ECBD6', soft:'#D3F0F3', strong:'#87D6DF'},
+  ghost:{es:'Fantasma', color:'#705898', soft:'#D8D0E5', strong:'#8670AB'},
+  dragon:{es:'Dragón', color:'#7038F8', soft:'#D6C7FD', strong:'#8B5AFA'},
+  steel:{es:'Acero', color:'#8E9BA8', soft:'#DDE2E7', strong:'#A3AEB9'},
+  dark:{es:'Siniestro', color:'#6B5848', soft:'#D7CFC8', strong:'#84705E'}
+};
+
+const RAW = [
+  [1,'Bulbasaur',['grass','poison']],[2,'Ivysaur',['grass','poison']],[3,'Venusaur',['grass','poison']],
+  [4,'Charmander',['fire']],[5,'Charmeleon',['fire']],[6,'Charizard',['fire','flying']],
+  [7,'Squirtle',['water']],[8,'Wartortle',['water']],[9,'Blastoise',['water']],
+  [10,'Caterpie',['bug']],[11,'Metapod',['bug']],[12,'Butterfree',['bug','flying']],
+  [13,'Weedle',['bug','poison']],[14,'Kakuna',['bug','poison']],[15,'Beedrill',['bug','poison']],
+  [16,'Pidgey',['normal','flying']],[17,'Pidgeotto',['normal','flying']],[18,'Pidgeot',['normal','flying']],
+  [19,'Rattata',['normal']],[20,'Raticate',['normal']],[21,'Spearow',['normal','flying']],
+  [22,'Fearow',['normal','flying']],[23,'Ekans',['poison']],[24,'Arbok',['poison']],
+  [25,'Pikachu',['electric']],[26,'Raichu',['electric']],[27,'Sandshrew',['ground']],
+  [28,'Sandslash',['ground']],[29,'Nidoran ♀',['poison']],[30,'Nidorina',['poison']],
+  [31,'Nidoqueen',['poison','ground']],[32,'Nidoran ♂',['poison']],[33,'Nidorino',['poison']],
+  [34,'Nidoking',['poison','ground']],[35,'Clefairy',['fairy']],[36,'Clefable',['fairy']],
+  [37,'Vulpix',['fire']],[38,'Ninetales',['fire']],[39,'Jigglypuff',['normal','fairy']],
+  [40,'Wigglytuff',['normal','fairy']],[41,'Zubat',['poison','flying']],[42,'Golbat',['poison','flying']],
+  [43,'Oddish',['grass','poison']],[44,'Gloom',['grass','poison']],[45,'Vileplume',['grass','poison']],
+  [46,'Paras',['bug','grass']],[47,'Parasect',['bug','grass']],[48,'Venonat',['bug','poison']]
+];
+
+const CHART = {
+  normal:{weak:['fighting'],resist:['ghost']},
+  fire:{weak:['water','ground','rock'],resist:['fire','grass','ice','bug','steel','fairy']},
+  water:{weak:['electric','grass'],resist:['fire','water','ice','steel']},
+  electric:{weak:['ground'],resist:['electric','flying','steel']},
+  grass:{weak:['fire','ice','poison','flying','bug'],resist:['water','electric','grass','ground']},
+  ice:{weak:['fire','fighting','rock','steel'],resist:['ice']},
+  fighting:{weak:['flying','psychic','fairy'],resist:['bug','rock','dark']},
+  poison:{weak:['ground','psychic'],resist:['grass','fighting','poison','bug','fairy']},
+  ground:{weak:['water','grass','ice'],resist:['poison','rock','electric']},
+  flying:{weak:['electric','ice','rock'],resist:['grass','fighting','bug','ground']},
+  psychic:{weak:['bug','ghost','dark'],resist:['fighting','psychic']},
+  bug:{weak:['fire','flying','rock'],resist:['grass','fighting','ground']},
+  rock:{weak:['water','grass','fighting','ground','steel'],resist:['normal','fire','poison','flying']},
+  ghost:{weak:['ghost','dark'],resist:['poison','bug','normal','fighting']},
+  dragon:{weak:['ice','dragon','fairy'],resist:['fire','water','electric','grass']},
+  dark:{weak:['fighting','bug','fairy'],resist:['ghost','dark','psychic']},
+  steel:{weak:['fire','fighting','ground'],resist:['normal','grass','ice','flying','psychic','bug','rock','dragon','steel','fairy','poison']},
+  fairy:{weak:['poison','steel'],resist:['fighting','bug','dark','dragon']}
+};
+
+// id: [peso kg, altura m, categoría, habilidad, % macho (null = sin género)]
+const META = {
+  1:[6.9,0.7,'SEMILLA','Espesura',87.5], 2:[13,1,'SEMILLA','Espesura',87.5], 3:[100,2,'SEMILLA','Espesura',87.5],
+  4:[8.5,0.6,'LAGARTIJA','Mar Llamas',87.5], 5:[19,1.1,'LLAMA','Mar Llamas',87.5], 6:[90.5,1.7,'LLAMA','Mar Llamas',87.5],
+  7:[9,0.5,'TORTUGUITA','Torrente',87.5], 8:[22.5,1,'TORTUGA','Torrente',87.5], 9:[85.5,1.6,'MARISCO','Torrente',87.5],
+  10:[2.9,0.3,'GUSANO','Polvo Escudo',50], 11:[9.9,0.7,'CAPULLO','Muda',50], 12:[32,1.1,'MARIPOSA','Ojo Compuesto',50],
+  13:[3.2,0.3,'GUSANO','Polvo Escudo',50], 14:[10,0.6,'CAPULLO','Muda',50], 15:[29.5,1,'ABEJA VENENO','Enjambre',50],
+  16:[1.8,0.3,'PÁJARO','Vista Lince',50], 17:[30,1.1,'PÁJARO','Vista Lince',50], 18:[39.5,1.5,'PÁJARO','Vista Lince',50],
+  19:[3.5,0.3,'RATÓN','Fuga',50], 20:[18.5,0.7,'RATÓN','Fuga',50], 21:[2,0.3,'PÁJARO','Vista Lince',50],
+  22:[38,1.2,'PICOS','Vista Lince',50], 23:[6.9,2,'SERPIENTE','Intimidación',50], 24:[65,3.5,'COBRA','Intimidación',50],
+  25:[6,0.4,'RATÓN','Elec. Estática',50], 26:[30,0.8,'RATÓN','Elec. Estática',50], 27:[12,0.6,'RATÓN','Velo Arena',50],
+  28:[29.5,1,'RATÓN','Velo Arena',50], 29:[7,0.4,'VENENO PUNZANTE','Punto Tóxico',0], 30:[20,0.8,'VENENO PUNZANTE','Punto Tóxico',0],
+  31:[60,1.3,'PERFORADORA','Punto Tóxico',0], 32:[9,0.5,'VENENO PUNZANTE','Punto Tóxico',100], 33:[19.5,0.9,'VENENO PUNZANTE','Punto Tóxico',100],
+  34:[62,1.4,'PERFORADORA','Punto Tóxico',100], 35:[7.5,0.6,'HADA','Encanto',25], 36:[40,1.3,'HADA','Encanto',25],
+  37:[9.9,0.6,'ZORRO','Absorbe Fuego',25], 38:[19.9,1.1,'ZORRO','Absorbe Fuego',25], 39:[5.5,0.5,'GLOBO','Cantoritmo',25],
+  40:[12,1,'GLOBO','Cantoritmo',25], 41:[7.5,0.8,'MURCIÉLAGO','Rastreo',50], 42:[55,1.6,'MURCIÉLAGO','Rastreo',50],
+  43:[5.4,0.5,'HIERBAJO','Clorofila',50], 44:[8.6,0.8,'HIERBAJO','Clorofila',50], 45:[18.6,1.2,'FLOR','Clorofila',50],
+  46:[5.4,0.3,'HONGO','Efecto Espora',50], 47:[29.5,1,'HONGO','Efecto Espora',50], 48:[30,1,'INSECTO','Ojo Compuesto',50]
+};
+
+const DESC = {
+  1:'Tiene una semilla de planta en la espalda desde que nace. La semilla crece lentamente.',
+  4:'Prefiere las cosas calientes. Cuando llueve, dicen que sale vapor de la punta de su cola.',
+  7:'Cuando se retrae en su duro caparazón, dispara agua con una presión increíble.',
+  25:'Cuando varios de estos Pokémon se juntan, su electricidad puede causar tormentas.'
+};
+
+// Iconos vectoriales (silueta simple, misma familia visual que los PNG de tipo)
+const GLYPH = {
+  water:'M12 2C12 2 5 10.4 5 14.6 5 18.7 8.1 22 12 22s7-3.3 7-7.4C19 10.4 12 2 12 2z',
+  bug:'M12 2l2.2 2.2-1.2 1.2h-2L9.8 4.2 12 2zm-1 5h2c3 0 5 2.4 5 5.6 0 4-2.2 7.4-6 7.4s-6-3.4-6-7.4C6 9.4 8 7 11 7zM3 10l3 1.6-3 1.6V10zm18 0v3.2L18 11.6 21 10zM3.6 17l2.8-1v2.4L3.6 17zm16.8 0l-2.8 1.4V16l2.8 1z',
+  flying:'M2 9c5-.6 9 .4 11.4 3.2C15 14 15.6 16.4 15.4 19c-1.6-2.2-3.4-3.6-5.6-4.4 1.6 1.6 2.6 3.4 3 5.4C9.4 18 6 14.6 2 9zm12.6-2c2.8-.6 5.4.4 7.4 3-2.4-.4-4.4 0-6 1.2-.4-1.6-.9-3-1.4-4.2z',
+  normal:'M12 3l2.6 5.4 6 .9-4.3 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.4 9.3l6-.9L12 3z',
+  electric:'M13.4 2L5 13.4h4.6L8.6 22 19 10.2h-5L15.4 2h-2z',
+  ground:'M4 15h16l2 6H2l2-6zm3-4h10l1.4 3H5.6L7 11zm3-4h4l1.2 3H8.8L10 7z',
+  fairy:'M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4L12 2zm6 12l1.2 2.6L22 18l-2.8 1.4L18 22l-1.2-2.6L14 18l2.8-1.4L18 14z',
+  fighting:'M7 6h6.4c1.6 0 2.6.8 2.6 2.2 0 .8-.4 1.4-1 1.8 1 .4 1.6 1.2 1.6 2.4 0 1.8-1.4 3-3.4 3H7V6zm-3 4h2v6H4c-1.1 0-2-.9-2-2v-2c0-1.1.9-2 2-2zm14 0h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2v-6z',
+  psychic:'M12 2c4.4 0 8 3.4 8 7.6 0 3-1.6 4.6-3 6-1 1-1.6 1.8-1.7 3.2L15.2 22H8.8l-.1-3.2C8.6 17.4 8 16.6 7 15.6c-1.4-1.4-3-3-3-6C4 5.4 7.6 2 12 2zm0 4a3.6 3.6 0 100 7.2A3.6 3.6 0 0012 6z',
+  rock:'M9 3h7l5 6-4 12H7L2 12l7-9zm.6 3.4L5 12l3.4 6h7l2.8-8.4L14 6.4H9.6z',
+  ice:'M11 2h2v20h-2V2zM3.4 6.4l1-1.7L21.6 15l-1 1.7L3.4 6.4zm0 11.2L20.6 7.3l1 1.7L4.4 19.3l-1-1.7z',
+  ghost:'M12 2c4.4 0 7 3.2 7 7.6V22l-2.4-2-2.3 2-2.3-2-2.3 2L7.4 20 5 22V9.6C5 5.2 7.6 2 12 2zM9.6 8a1.6 1.6 0 100 3.2 1.6 1.6 0 000-3.2zm4.8 0a1.6 1.6 0 100 3.2 1.6 1.6 0 000-3.2z',
+  dragon:'M2 7l5-2 3 3h5l3-3 4 3-3 4 2 3-6 2-1 3-4-2-4 2 .6-4L3 14l2-3L2 7zm8 4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z',
+  steel:'M12 2l4 2.4v4.8L12 11.6 8 9.2V4.4L12 2zM4 8.6l4 2.4v4.8L4 18.2 0 15.8V11L4 8.6zm16 0L24 11v4.8l-4 2.4-4-2.4V11l4-2.4zM12 14l4 2.4v4.8L12 23.6 8 21.2v-4.8L12 14z',
+  dark:'M15 2a10 10 0 100 20 8 8 0 010-20zm5 3l1.2 2.4L23.6 8.6 21.2 9.8 20 12.2l-1.2-2.4L16.4 8.6l2.4-1.2L20 5z'
+};
+
+const svgIcon = (t, color) => {
+  const p = GLYPH[t];
+  if (!p) return null;
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="' + p + '" fill="' + color + '"/></svg>';
+  return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+};
+
+const chip = t => {
+  const d = TYPES[t];
+  const svg = d.icon ? null : svgIcon(t, d.color);
+  const art = d.icon ? 'url(' + d.icon + ')' : svg;
+  return {
+    label: d.es, color: d.color,
+    gw: art ? (d.icon ? '13px' : '15px') : '10px',
+    gh: art ? (d.icon ? '14px' : '15px') : '10px',
+    gRadius: art ? '0' : '50%',
+    dotColor: art ? 'transparent' : d.color,
+    iconBg: art || 'none'
+  };
+};
+
+const HEART_OUT = 'url(icons/heart-outline.png)';
+const HEART_FILL = 'url(icons/heart-filled.png)';
+
+const SPRITE = n => 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/' + n + '.png';
+
+class Component extends DCLogic {
+  state = {
+    screen: 'pokedex',
+    soon: 'Regiones',
+    splash: true,
+    onboarding: false,
+    obStep: 0,
+    listState: 'ready',
+    collapsed: false,
+    query: '',
+    applied: [],
+    draft: [],
+    showFilter: false,
+    page: 1,
+    favs: [4, 25],
+    selected: 1,
+    from: 'pokedex',
+    confirmId: null,
+    scrolled: false
+  };
+
+  mainRef = React.createRef();
+  timers = [];
+
+  componentDidMount() {
+    const p = this.props;
+    const start = p.startScreen || 'flow';
+    if (start === 'flow') {
+      this.timers.push(setTimeout(() => this.setState({ splash: false, onboarding: true }), 1900));
+    } else {
+      const map = { splash:{splash:true}, onboarding:{splash:false,onboarding:true}, pokedex:{splash:false,onboarding:false,screen:'pokedex'}, detalle:{splash:false,onboarding:false,screen:'detail',selected:1}, favoritos:{splash:false,onboarding:false,screen:'favorites'}, proximamente:{splash:false,onboarding:false,screen:'soon'} };
+      this.setState(Object.assign({ splash:false, onboarding:false }, map[start] || {}));
+    }
+    if (p.listState) this.setState({ listState: p.listState });
+    if (p.collapsedMenu) this.setState({ collapsed: true });
+    const el = this.mainRef.current;
+    if (el) { this.onScroll = () => this.setState({ scrolled: el.scrollTop > 260 }); el.addEventListener('scroll', this.onScroll); }
+  }
+
+  componentWillUnmount() {
+    this.timers.forEach(clearTimeout);
+    const el = this.mainRef.current;
+    if (el && this.onScroll) el.removeEventListener('scroll', this.onScroll);
+  }
+
+  loadThen(next) {
+    this.setState({ listState: 'skeleton' });
+    this.timers.push(setTimeout(() => this.setState({ listState: next || 'ready' }), 1200));
+  }
+
+  filtered() {
+    const q = this.state.query.trim().toLowerCase();
+    const f = this.state.applied;
+    return RAW.filter(r => {
+      const okQ = !q || r[1].toLowerCase().includes(q) || String(r[0]).includes(q);
+      const okF = !f.length || r[2].some(t => f.includes(t));
+      return okQ && okF;
+    });
+  }
+
+  card(r) {
+    const prim = TYPES[r[2][0]];
+    const fav = this.state.favs.includes(r[0]);
+    return {
+      num: 'N°' + String(r[0]).padStart(3, '0'),
+      name: r[1],
+      img: SPRITE(r[0]),
+      bg: 'url(' + SPRITE(r[0]) + ')',
+      soft: prim.soft,
+      strong: prim.strong,
+      ring: fav ? '2px solid #EE2B2B' : '0px solid transparent',
+      favBg: fav ? '#FFFFFF' : 'rgba(255,255,255,.28)',
+      favColor: fav ? '#EE2B2B' : '#FFFFFF',
+      chips: r[2].map(chip),
+      heartBg: fav ? HEART_FILL : HEART_OUT,
+      open: () => this.setState(s => ({ screen: 'detail', selected: r[0], from: s.screen })),
+      toggle: (e) => { if (e && e.stopPropagation) e.stopPropagation(); if (fav) this.setState({ confirmId: r[0] }); else this.setState(s => ({ favs: s.favs.concat(r[0]) })); }
+    };
+  }
+
+  detailVals() {
+    const id = this.state.selected || 1;
+    const r = RAW.find(x => x[0] === id) || RAW[0];
+    const m = META[id] || [10, 1, 'DESCONOCIDA', 'Desconocida', 50];
+    const prim = TYPES[r[2][0]];
+    const fav = this.state.favs.includes(id);
+    const weak = [];
+    r[2].forEach(t => CHART[t].weak.forEach(w => { if (weak.indexOf(w) < 0) weak.push(w); }));
+    const resisted = [];
+    r[2].forEach(t => CHART[t].resist.forEach(x => resisted.push(x)));
+    const finalWeak = weak.filter(w => resisted.indexOf(w) < 0);
+    const male = m[4];
+    return {
+      id: id,
+      name: r[1],
+      num: 'N°' + String(id).padStart(3, '0'),
+      img: SPRITE(id),
+      bg: 'url(' + SPRITE(id) + ')',
+      soft: prim.soft,
+      strong: prim.strong,
+      desc: DESC[id] || ('Pokémon de tipo ' + r[2].map(t => TYPES[t].es).join(' y ') + ' registrado en la región de Kanto. Sus hábitos y evoluciones siguen en estudio por los investigadores.'),
+      chips: r[2].map(chip),
+      weak: finalWeak.map(chip),
+      weight: String(m[0]).replace('.', ',') + ' kg',
+      height: String(m[1]).replace('.', ',') + ' m',
+      cat: m[2],
+      ability: m[3],
+      hasGender: male !== null,
+      malePct: String(male).replace('.', ',') + '%',
+      femalePct: String(100 - male).replace('.', ',') + '%',
+      maleWidth: male + '%',
+      favBg: fav ? '#FFFFFF' : 'rgba(255,255,255,.25)',
+      heartBg: fav ? HEART_FILL : HEART_OUT,
+      favLabel: fav ? 'Quitar de favoritos' : 'Agregar a favoritos',
+      toggle: () => { if (fav) this.setState({ confirmId: id }); else this.setState(s => ({ favs: s.favs.concat(id) })); }
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const perPage = this.props.perPage || 12;
+    const list = this.filtered();
+    const shown = Math.min(s.page * perPage, list.length);
+    const pages = Math.max(1, Math.ceil(list.length / perPage));
+    const activeNav = s.screen;
+
+    const navStyle = (on) => on
+      ? { bg: '#EAF3FE', color: '#2D8CF0', shadow: 'inset 0 0 0 1px rgba(45,140,240,.18)' }
+      : { bg: 'transparent', color: '#5C636E', shadow: 'none' };
+    const dex = navStyle(activeNav === 'pokedex' || (activeNav === 'detail' && s.from !== 'favorites'));
+    const fav = navStyle(activeNav === 'favorites' || (activeNav === 'detail' && s.from === 'favorites'));
+    const reg = navStyle(activeNav === 'soon' && s.soon === 'Regiones');
+    const pro = navStyle(activeNav === 'soon' && s.soon === 'Perfil');
+
+    const empty = s.listState === 'ready' && list.length === 0;
+    const favList = RAW.filter(r => s.favs.includes(r[0])).filter(r => !s.applied.length || r[2].some(t => s.applied.includes(t)));
+
+    return {
+      mainRef: this.mainRef,
+      sidebarW: s.collapsed ? '92px' : '268px',
+      labelOpacity: s.collapsed ? 0 : 1,
+      tipDisplay: s.collapsed ? 'none' : 'block',
+      toggleSidebar: () => this.setState(x => ({ collapsed: !x.collapsed })),
+      favCount: s.favs.length,
+
+      nav: {
+        dexBg: dex.bg, dexColor: dex.color, dexShadow: dex.shadow,
+        favBg: fav.bg, favColor: fav.color, favShadow: fav.shadow,
+        regBg: reg.bg, regColor: reg.color, regShadow: reg.shadow,
+        proBg: pro.bg, proColor: pro.color, proShadow: pro.shadow
+      },
+      goPokedex: () => { this.setState({ screen: 'pokedex' }); this.loadThen('ready'); },
+      goFavorites: () => this.setState({ screen: 'favorites' }),
+      goRegions: () => this.setState({ screen: 'soon', soon: 'Regiones' }),
+      goProfile: () => this.setState({ screen: 'soon', soon: 'Perfil' }),
+
+      isDex: s.screen === 'pokedex',
+      isFav: s.screen === 'favorites',
+      isSoon: s.screen === 'soon',
+      soonTitle: s.soon,
+      isDetail: s.screen === 'detail',
+      d: this.detailVals(),
+      goBack: () => this.setState({ screen: s.from === 'favorites' ? 'favorites' : 'pokedex' }),
+
+      isSkeleton: s.listState === 'skeleton',
+      isReady: s.listState === 'ready' && list.length > 0,
+      isEmpty: empty || s.listState === 'empty',
+      isError: s.listState === 'error',
+      skeletons: [1,2,3,4,5,6],
+      retry: () => this.loadThen('ready'),
+      clearAll: () => { this.setState({ query: '', applied: [], draft: [], page: 1 }); },
+
+      query: s.query,
+      onSearch: (e) => this.setState({ query: e.target.value, page: 1 }),
+
+      pageItems: list.slice(0, shown).map(r => this.card(r)),
+      shownCount: shown,
+      totalCount: list.length,
+      moreDisplay: shown < list.length ? 'inline-block' : 'none',
+      loadMore: () => this.setState(x => ({ page: x.page + 1 })),
+      dots: Array.from({ length: pages }, (_, i) => ({
+        w: i + 1 === s.page ? '30px' : '8px',
+        bg: i + 1 === s.page ? '#2D8CF0' : '#CDD4DD',
+        go: () => this.setState({ page: i + 1 })
+      })),
+
+      favItems: favList.map(r => this.card(r)),
+      favHasItems: favList.length > 0,
+      favIsEmpty: favList.length === 0,
+
+      fabDisplay: s.scrolled ? 'flex' : 'none',
+      scrollTop: () => { const el = this.mainRef.current; if (el) el.scrollTo({ top: 0, behavior: 'smooth' }); },
+
+      showFilter: s.showFilter,
+      openFilter: () => this.setState({ showFilter: true, draft: s.applied.slice() }),
+      closeFilter: () => this.setState({ showFilter: false }),
+      cancelFilter: () => this.setState({ showFilter: false, draft: [] }),
+      applyFilter: () => { this.setState({ showFilter: false, applied: s.draft.slice(), page: 1 }); this.loadThen('ready'); },
+      activeFilterCount: s.applied.length,
+      filterBadge: s.applied.length ? 'inline-block' : 'none',
+      activeChips: s.applied.map(t => ({
+        label: TYPES[t].es, color: TYPES[t].color,
+        remove: () => this.setState(x => ({ applied: x.applied.filter(y => y !== t), page: 1 }))
+      })),
+      typeRows: Object.keys(TYPES).sort((a, b) => TYPES[a].es.localeCompare(TYPES[b].es)).map(t => {
+        const on = s.draft.includes(t);
+        const g = chip(t);
+        return {
+          label: g.label, color: g.color,
+          gw: g.gw, gh: g.gh, gRadius: g.gRadius, dotColor: g.dotColor, iconBg: g.iconBg,
+          boxBg: on ? '#1B3FAF' : '#FFFFFF',
+          boxBorder: on ? '#1B3FAF' : '#D3D8E0',
+          mark: on ? '✓' : '',
+          toggle: () => this.setState(x => ({ draft: x.draft.includes(t) ? x.draft.filter(y => y !== t) : x.draft.concat(t) }))
+        };
+      }),
+
+      confirmOpen: s.confirmId !== null,
+      confirmName: s.confirmId ? (RAW.find(x => x[0] === s.confirmId) || RAW[0])[1] : '',
+      confirmNum: s.confirmId ? 'N°' + String(s.confirmId).padStart(3, '0') : '',
+      confirmBg: s.confirmId ? 'url(' + SPRITE(s.confirmId) + ')' : 'none',
+      confirmSoft: s.confirmId ? TYPES[(RAW.find(x => x[0] === s.confirmId) || RAW[0])[2][0]].soft : '#EEE',
+      confirmYes: () => this.setState(x => ({ favs: x.favs.filter(y => y !== x.confirmId), confirmId: null })),
+      confirmNo: () => this.setState({ confirmId: null }),
+
+      showSplash: s.splash,
+      showOnboarding: s.onboarding,
+      obShift: s.obStep === 0 ? '0%' : '-50%',
+      obLabel: s.obStep === 0 ? 'Continuar' : 'Empecemos',
+      ob: {
+        w0: s.obStep === 0 ? '30px' : '8px',
+        w1: s.obStep === 1 ? '30px' : '8px',
+        c0: s.obStep === 0 ? '#1B3FAF' : '#CDD4DD',
+        c1: s.obStep === 1 ? '#1B3FAF' : '#CDD4DD'
+      },
+      obGo0: () => this.setState({ obStep: 0 }),
+      obGo1: () => this.setState({ obStep: 1 }),
+      obNext: () => { if (s.obStep === 0) this.setState({ obStep: 1 }); else { this.setState({ onboarding: false, screen: 'pokedex' }); this.loadThen('ready'); } },
+      obSkip: () => { this.setState({ onboarding: false, screen: 'pokedex' }); this.loadThen('ready'); }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

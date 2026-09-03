@@ -1,0 +1,350 @@
+/**
+ * Design tokens extracted from the Claude Design export (Pokedex Desktop).
+ * Tailwind v4 CSS-first configuration: every custom property under @theme
+ * generates matching utilities (e.g. --color-brand -> bg-brand, text-brand).
+ *
+ * Rule: components consume tokens only. No literal hex, px radius or shadow
+ * values anywhere else in the codebase.
+ */
+
+@import 'tailwindcss';
+
+@theme {
+  /* ---------------------------------------------------------------
+   * Typography
+   * ------------------------------------------------------------- */
+  --font-sans: 'Poppins', Helvetica, system-ui, sans-serif;
+
+  --text-xs: 0.75rem; /* 12px - badges, counters */
+  --text-sm: 0.8125rem; /* 13px - eyebrow labels, captions */
+  --text-base: 0.9375rem; /* 15px - body, nav, inputs */
+  --text-md: 1rem; /* 16px - emphasized body */
+  --text-chip: 0.875rem; /* 14px - detail/weakness chips, filter rows, gender readout */
+  --text-lg: 1.0625rem; /* 17px - brand wordmark */
+  --text-xl: 1.1875rem; /* 19px - section titles */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.625rem; /* 26px - card headings */
+  --text-4xl: 2.125rem; /* 34px - page title */
+  --text-5xl: 2.375rem; /* 38px - detail title */
+  --text-6xl: 2.75rem; /* 44px - splash */
+
+  --tracking-tightest: -0.02em; /* page titles */
+  --tracking-eyebrow: 0.14em; /* uppercase eyebrow labels */
+
+  /* ---------------------------------------------------------------
+   * Neutrals and surfaces
+   * ------------------------------------------------------------- */
+  --color-canvas: #f5f6f8; /* app background */
+  --color-canvas-translucent: rgb(245 246 248 / 0.86); /* sticky header backdrop */
+  --color-surface: #ffffff; /* cards, sidebar, inputs */
+  --color-surface-muted: #f7f9fc; /* sidebar tip box */
+  --color-surface-sunken: #f2f4f7; /* icon buttons */
+  --color-surface-tint: #f1f5fa; /* onboarding illustration panel */
+  --color-placeholder-shine: #f7f9fb; /* empty/coming-soon pokeball illustration highlight */
+  --color-surface-modal: #fbfbfc; /* dialogs: filters, confirm-removal, onboarding */
+  --color-overlay: rgb(15 20 30 / 0.5); /* modal backdrop */
+
+  --color-ink: #16181d; /* primary text */
+  --color-ink-secondary: #4a5260; /* detail description, gender readout */
+  --color-ink-muted: #6c737f; /* secondary text */
+  --color-ink-subtle: #8a919c; /* eyebrow, placeholders */
+  --color-ink-faint: #9aa1ac; /* input icons */
+  --color-nav-inactive: #5c636e; /* sidebar links, not active */
+
+  --color-border: #e4e7ec;
+  --color-border-strong: #dfe3e9;
+  --color-divider: #edeff3; /* detail panel rule */
+  --color-checkbox-border: #d3d8e0; /* filter modal, unselected */
+  --color-dot-inactive: #cdd4dd; /* pagination / onboarding dots */
+  --color-scrollbar: #d6dae0;
+
+  --color-gender-male: #2d5bd8;
+  --color-gender-female: #f4708f;
+
+  /* Skeleton shimmer stops */
+  --color-skeleton-base: #eceef1;
+  --color-skeleton-highlight: #f6f7f9;
+
+  /* Neutral interactive surfaces: secondary buttons, icon buttons */
+  --color-neutral-button: #eceef1;
+  --color-neutral-button-hover: #e1e4e9;
+  --color-surface-sunken-hover: #e6eaf0;
+
+  /* ---------------------------------------------------------------
+   * Brand
+   * ------------------------------------------------------------- */
+  --color-brand: #2d8cf0; /* primary action, active nav */
+  --color-brand-hover: #1b6fcc;
+  --color-brand-soft: #eaf3fe; /* tinted backgrounds */
+  --color-brand-deep: #1b3faf; /* gradient end */
+  --color-accent: #ee2b2b; /* pokeball red, favorite badge */
+  --color-success: #2fa84f; /* toast confirmations */
+
+  /* ---------------------------------------------------------------
+   * Radii
+   * ------------------------------------------------------------- */
+  --radius-xs: 8px;
+  --radius-sm: 14px; /* icon buttons */
+  --radius-md: 16px; /* nav items */
+  --radius-lg: 18px; /* tip box */
+  --radius-xl: 24px; /* cards */
+  --radius-2xl: 28px;
+  --radius-3xl: 32px; /* modals */
+  --radius-pill: 99px; /* chips, search, buttons */
+
+  /* ---------------------------------------------------------------
+   * Shadows
+   * ------------------------------------------------------------- */
+  --shadow-card: 0 12px 30px -24px rgb(20 30 50 / 0.5);
+  --shadow-card-hover: 0 22px 40px -18px rgb(20 30 50 / 0.35), 0 4px 10px rgb(20 30 50 / 0.06);
+  --shadow-control: 0 10px 24px -20px rgb(20 30 50 / 0.5);
+  --shadow-brand: 0 18px 30px -18px rgb(45 140 240 / 0.9);
+  --shadow-danger: 0 18px 30px -18px rgb(238 43 43 / 0.9);
+  --shadow-sidebar: 6px 0 28px -18px rgb(20 30 50 / 0.35);
+  --shadow-modal: 0 50px 90px -40px rgb(10 16 28 / 0.7);
+
+  /* ---------------------------------------------------------------
+   * Motion
+   * ------------------------------------------------------------- */
+  --ease-out-expo: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 200ms;
+  --duration-base: 280ms;
+  --duration-slow: 320ms;
+}
+
+/* -----------------------------------------------------------------
+ * Pokemon types. Each type has three tones: base (chips, fills), soft
+ * (backgrounds), strong (gradient end / hover).
+ *
+ * `static`, not the regular `@theme` block above: these are never read
+ * through a literal Tailwind utility class (do NOT build one dynamically,
+ * e.g. `bg-type-${type}` — Tailwind extracts class names statically from
+ * source text and would drop an interpolated one anyway). They're read at
+ * runtime via `var(--color-type-*)` from shared/ui/pokemonTypeTheme.ts, and
+ * Tailwind v4 tree-shakes any theme variable that no generated utility
+ * references — `static` opts these out of that so the custom properties
+ * actually ship in the compiled CSS.
+ * --------------------------------------------------------------- */
+@theme static {
+  --color-type-grass: #5fbf5a;
+  --color-type-grass-soft: #dcedbc;
+  --color-type-grass-strong: #7dc64f;
+
+  --color-type-poison: #a040a0;
+  --color-type-poison-soft: #e7cce7;
+  --color-type-poison-strong: #b357b3;
+
+  --color-type-fire: #f08030;
+  --color-type-fire-soft: #fbd3a6;
+  --color-type-fire-strong: #f79030;
+
+  --color-type-water: #3b9be8;
+  --color-type-water-soft: #c7e1f8;
+  --color-type-water-strong: #4fa8ee;
+
+  --color-type-bug: #a8b820;
+  --color-type-bug-soft: #e4e8b5;
+  --color-type-bug-strong: #b9c63c;
+
+  --color-type-flying: #8aa9e8;
+  --color-type-flying-soft: #dce4f7;
+  --color-type-flying-strong: #9db6ee;
+
+  --color-type-normal: #9e9e86;
+  --color-type-normal-soft: #e6e6dc;
+  --color-type-normal-strong: #b3b39c;
+
+  --color-type-electric: #efbe18;
+  --color-type-electric-soft: #fbedb4;
+  --color-type-electric-strong: #f5d033;
+
+  --color-type-ground: #d9a84e;
+  --color-type-ground-soft: #f2e0bc;
+  --color-type-ground-strong: #e0b767;
+
+  --color-type-fairy: #ee8fa5;
+  --color-type-fairy-soft: #fad9e1;
+  --color-type-fairy-strong: #f2a2b4;
+
+  --color-type-fighting: #c03028;
+  --color-type-fighting-soft: #efc7c4;
+  --color-type-fighting-strong: #ce5148;
+
+  --color-type-psychic: #f85888;
+  --color-type-psychic-soft: #fcd2de;
+  --color-type-psychic-strong: #fa7ca3;
+
+  --color-type-rock: #b8a038;
+  --color-type-rock-soft: #e8dfb9;
+  --color-type-rock-strong: #c7b255;
+
+  --color-type-ice: #6ecbd6;
+  --color-type-ice-soft: #d3f0f3;
+  --color-type-ice-strong: #87d6df;
+
+  --color-type-ghost: #705898;
+  --color-type-ghost-soft: #d8d0e5;
+  --color-type-ghost-strong: #8670ab;
+
+  --color-type-dragon: #7038f8;
+  --color-type-dragon-soft: #d6c7fd;
+  --color-type-dragon-strong: #8b5afa;
+
+  --color-type-steel: #8e9ba8;
+  --color-type-steel-soft: #dde2e7;
+  --color-type-steel-strong: #a3aeb9;
+
+  --color-type-dark: #6b5848;
+  --color-type-dark-soft: #d7cfc8;
+  --color-type-dark-strong: #84705e;
+}
+
+/* -----------------------------------------------------------------
+ * Layout constants that are not Tailwind theme keys.
+ * --------------------------------------------------------------- */
+:root {
+  --sidebar-width: 268px;
+  --sidebar-width-collapsed: 92px;
+  --page-padding-x: 44px;
+  --card-min-width: 380px;
+  --card-height: 150px;
+  --control-height: 56px;
+  --page-size: 12; /* items per "load more" batch */
+}
+
+/* -----------------------------------------------------------------
+ * Base
+ * --------------------------------------------------------------- */
+@layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: #cfe4fb;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-scrollbar);
+    border-radius: var(--radius-pill);
+    border: 3px solid var(--color-canvas);
+  }
+
+  /* Sprites are low-resolution PNGs; nearest-neighbour keeps them crisp. */
+  .sprite {
+    image-rendering: pixelated;
+  }
+}
+
+/* -----------------------------------------------------------------
+ * Utilities the design depends on and Tailwind cannot express inline.
+ * --------------------------------------------------------------- */
+@layer utilities {
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-skeleton-base) 0%,
+      var(--color-skeleton-highlight) 40%,
+      var(--color-skeleton-base) 80%
+    );
+    background-size: 420px 100%;
+    animation: shimmer 1.25s linear infinite;
+  }
+
+  .card-lift {
+    transition:
+      transform var(--duration-base) var(--ease-out-expo),
+      box-shadow var(--duration-base) var(--ease-out-expo);
+  }
+
+  .card-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-card-hover);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -420px 0;
+  }
+  100% {
+    background-position: 420px 0;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pokeball-spin {
+  0% {
+    transform: rotate(0) translateY(0);
+  }
+  50% {
+    transform: rotate(180deg) translateY(-14px);
+  }
+  100% {
+    transform: rotate(360deg) translateY(0);
+  }
+}
+
+@keyframes pokeball-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+/* Respect users who ask for reduced motion — the design leans on
+   hover lifts, shimmer and float animations throughout. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

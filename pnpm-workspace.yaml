@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+  simple-git-hooks: true
+  vue-demi: true
+minimumReleaseAgeExclude:
+  - happy-dom@20.13.2
+  - vue-router@5.3.1
