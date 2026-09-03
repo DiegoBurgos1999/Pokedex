@@ -20,16 +20,16 @@ pnpm dev
 
 ## Scripts
 
-| Command              | Description                            |
-| -------------------- | -------------------------------------- |
-| `pnpm dev`           | Development server                     |
-| `pnpm build`         | Type-check and production build        |
-| `pnpm preview`       | Serve the production build             |
-| `pnpm lint`          | ESLint, fails on any warning           |
-| `pnpm format`        | Prettier write                         |
+| Command              | Description                             |
+| -------------------- | --------------------------------------- |
+| `pnpm dev`           | Development server                      |
+| `pnpm build`         | Type-check and production build         |
+| `pnpm preview`       | Serve the production build              |
+| `pnpm lint`          | ESLint, fails on any warning            |
+| `pnpm format`        | Prettier write                          |
 | `pnpm typecheck`     | `vue-tsc` across all project references |
-| `pnpm test`          | Vitest, single run                     |
-| `pnpm test:coverage` | Vitest with coverage report            |
+| `pnpm test`          | Vitest, single run                      |
+| `pnpm test:coverage` | Vitest with coverage report             |
 
 ## Structure
 
