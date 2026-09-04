@@ -11,8 +11,10 @@ import type {
 /** Project scope: generation 1 only. */
 export const GENERATION_ONE_COUNT = 151
 
-export const fetchPokemonIndex = (): Promise<PokemonListResponseDto> =>
-  httpGet(`/pokemon?limit=${GENERATION_ONE_COUNT}&offset=0`)
+export const fetchPokemonIndexPage = (
+  limit: number,
+  offset: number,
+): Promise<PokemonListResponseDto> => httpGet(`/pokemon?limit=${limit}&offset=${offset}`)
 
 export const fetchPokemonDetail = (idOrName: number | string): Promise<PokemonDto> =>
   httpGet(`/pokemon/${idOrName}`)

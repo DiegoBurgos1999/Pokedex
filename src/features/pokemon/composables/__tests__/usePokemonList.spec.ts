@@ -1,19 +1,19 @@
 import { flushPromises } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { PokemonDto, TypeDto } from '../../api/pokemonDto'
+import type { PokemonDto, PokemonListResponseDto, TypeDto } from '../../api/pokemonDto'
 import { usePokemonList } from '../usePokemonList'
 import { mountComposable } from './testHost'
 
-const { fetchPokemonIndex, fetchPokemonDetail, fetchType } = vi.hoisted(() => ({
-  fetchPokemonIndex: vi.fn(),
+const { fetchPokemonIndexPage, fetchPokemonDetail, fetchType } = vi.hoisted(() => ({
+  fetchPokemonIndexPage: vi.fn(),
   fetchPokemonDetail: vi.fn(),
   fetchType: vi.fn(),
 }))
 
 vi.mock('../../api/pokemonApi', async () => {
   const actual = await vi.importActual<object>('../../api/pokemonApi')
-  return { ...actual, fetchPokemonIndex, fetchPokemonDetail, fetchType }
+  return { ...actual, fetchPokemonIndexPage, fetchPokemonDetail, fetchType }
 })
 
 const dto = (id: number, name: string, types: string[] = ['normal']): PokemonDto => ({
@@ -26,10 +26,23 @@ const dto = (id: number, name: string, types: string[] = ['normal']): PokemonDto
   abilities: [],
 })
 
-const indexOf = (entries: Array<[number, string]>) => ({
-  count: entries.length,
-  results: entries.map(([id, name]) => ({ name, url: `https://pokeapi.co/api/v2/pokemon/${id}/` })),
-})
+const entryUrl = (id: number) => `https://pokeapi.co/api/v2/pokemon/${id}/`
+
+/** A tiny fake backend: slices a full name list the way `?limit&offset` would. */
+const backedBy = (names: string[]) => {
+  fetchPokemonIndexPage.mockImplementation(
+    (limit: number, offset: number): Promise<PokemonListResponseDto> =>
+      Promise.resolve({
+        count: names.length,
+        results: names
+          .slice(offset, offset + limit)
+          .map((name, i) => ({ name, url: entryUrl(offset + i + 1) })),
+      }),
+  )
+}
+
+const names = (count: number, prefix = 'p') =>
+  Array.from({ length: count }, (_, i) => `${prefix}${i + 1}`)
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -41,25 +54,128 @@ afterEach(() => {
 })
 
 describe('usePokemonList', () => {
-  it('resolves the index and shows the ready state with mapped items', async () => {
-    fetchPokemonIndex.mockResolvedValue(
-      indexOf([
-        [1, 'bulbasaur'],
-        [4, 'charmander'],
-        [7, 'squirtle'],
-      ]),
-    )
+  it('fetches the first backend page and shows it as ready', async () => {
+    backedBy(names(151))
 
     const { result } = mountComposable(() => usePokemonList())
     await flushPromises()
 
+    expect(fetchPokemonIndexPage).toHaveBeenCalledWith(12, 0)
     expect(result.state.value).toBe('ready')
-    expect(result.items.value.map((p) => p.name)).toEqual(['p1', 'p4', 'p7'])
-    expect(result.totalCount.value).toBe(3)
+    expect(result.items.value.map((p) => p.name)).toEqual(names(12))
+    expect(result.totalCount.value).toBe(151)
+    expect(result.hasMore.value).toBe(true)
   })
 
-  it('goes to the error state when the index fails to load', async () => {
-    fetchPokemonIndex.mockRejectedValue(new Error('network down'))
+  it('accumulates the next backend page on top of the first instead of replacing it', async () => {
+    backedBy(names(24))
+
+    const { result } = mountComposable(() => usePokemonList())
+    await flushPromises()
+
+    result.loadMore()
+    await flushPromises()
+
+    expect(fetchPokemonIndexPage).toHaveBeenCalledWith(12, 12)
+    expect(result.items.value).toHaveLength(24)
+    expect(result.items.value.map((p) => p.name)).toEqual(names(24))
+  })
+
+  it('never refetches a batch that was already loaded', async () => {
+    backedBy(names(24))
+    const { result } = mountComposable(() => usePokemonList())
+    await flushPromises()
+    result.loadMore()
+    await flushPromises()
+
+    expect(fetchPokemonIndexPage).toHaveBeenCalledTimes(2)
+  })
+
+  it('clamps the limit on the last, short batch instead of spilling into generation 2', async () => {
+    backedBy(names(151))
+    const { result } = mountComposable(() => usePokemonList())
+    await flushPromises()
+
+    // Jump straight to the last batch (offset 144, only 7 pokémon left).
+    for (let i = 0; i < 12; i++) {
+      result.loadMore()
+      await flushPromises()
+    }
+
+    expect(fetchPokemonIndexPage).toHaveBeenLastCalledWith(7, 144)
+    expect(result.hasMore.value).toBe(false)
+  })
+
+  it('search only matches pokémon already loaded, not ones further back', async () => {
+    backedBy(['bulbasaur', 'ivysaur', 'venusaur', 'charmander'])
+
+    const { result } = mountComposable(() => usePokemonList())
+    await flushPromises()
+
+    result.query.value = 'charmander'
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await flushPromises()
+
+    // charmander is entry #4, already within the first (and only) batch,
+    // so it's loaded and searchable.
+    expect(result.items.value.map((p) => p.id)).toEqual([4])
+  })
+
+  it('does not find a match that has not been loaded yet', async () => {
+    backedBy(names(24, 'mon'))
+
+    const { result } = mountComposable(() => usePokemonList())
+    await flushPromises()
+
+    // "mon13" lives in the second batch, which hasn't been requested yet.
+    result.query.value = 'mon13'
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await flushPromises()
+
+    expect(result.state.value).toBe('empty')
+
+    result.loadMore()
+    await flushPromises()
+
+    expect(result.items.value.map((p) => p.id)).toEqual([13])
+  })
+
+  it("shows isLoadingMore while the next batch's names are still being fetched, before any detail call exists", async () => {
+    backedBy(names(12))
+    const { result } = mountComposable(() => usePokemonList())
+    await flushPromises()
+
+    expect(result.isLoadingMore.value).toBe(false)
+
+    let resolveNextBatch!: (value: PokemonListResponseDto) => void
+    fetchPokemonIndexPage.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveNextBatch = resolve
+      }),
+    )
+
+    result.loadMore()
+    await flushPromises()
+
+    // The index-batch fetch for page 2 is in flight; no detail query for it
+    // exists yet (there's nothing to fetch details for), so a spinner that
+    // only watched detail queries would stay silent here.
+    expect(result.isLoadingMore.value).toBe(true)
+
+    resolveNextBatch({
+      count: 24,
+      results: names(24)
+        .slice(12, 24)
+        .map((name, i) => ({ name, url: entryUrl(13 + i) })),
+    })
+    await flushPromises()
+
+    expect(result.isLoadingMore.value).toBe(false)
+    expect(result.items.value).toHaveLength(24)
+  })
+
+  it('goes to the error state when the very first batch fails to load', async () => {
+    fetchPokemonIndexPage.mockRejectedValue(new Error('network down'))
 
     const { result } = mountComposable(() => usePokemonList())
     await flushPromises()
@@ -67,57 +183,22 @@ describe('usePokemonList', () => {
     expect(result.state.value).toBe('error')
   })
 
-  it('filters by name once the debounced query settles', async () => {
-    fetchPokemonIndex.mockResolvedValue(
-      indexOf([
-        [1, 'bulbasaur'],
-        [4, 'charmander'],
-      ]),
-    )
-
+  it('surfaces a loadMoreError (not the full-page error) when a later batch fails to fetch', async () => {
+    backedBy(names(24))
     const { result } = mountComposable(() => usePokemonList())
     await flushPromises()
 
-    result.query.value = 'char'
-    await new Promise((resolve) => setTimeout(resolve, 350))
-    await flushPromises()
-
-    expect(result.items.value.map((p) => p.name)).toEqual(['p4'])
-  })
-
-  it('shows the empty state when a search matches nothing', async () => {
-    fetchPokemonIndex.mockResolvedValue(indexOf([[1, 'bulbasaur']]))
-
-    const { result } = mountComposable(() => usePokemonList())
-    await flushPromises()
-
-    result.query.value = 'nonexistent'
-    await new Promise((resolve) => setTimeout(resolve, 350))
-    await flushPromises()
-
-    expect(result.state.value).toBe('empty')
-  })
-
-  it('grows the visible page with loadMore', async () => {
-    const entries = Array.from({ length: 14 }, (_, i) => [i + 1, `p${i + 1}`] as [number, string])
-    fetchPokemonIndex.mockResolvedValue(indexOf(entries))
-
-    const { result } = mountComposable(() => usePokemonList())
-    await flushPromises()
-
-    expect(result.shownCount.value).toBe(12)
-    expect(result.hasMore.value).toBe(true)
-
+    fetchPokemonIndexPage.mockRejectedValueOnce(new Error('offline'))
     result.loadMore()
     await flushPromises()
 
-    expect(result.shownCount.value).toBe(14)
-    expect(result.hasMore.value).toBe(false)
+    expect(result.state.value).toBe('ready')
+    expect(result.loadMoreError.value).toBe(true)
+    expect(result.items.value).toHaveLength(12)
   })
 
-  it('surfaces a loadMoreError (not the full-page error) when a later batch fails but earlier ones already loaded', async () => {
-    const entries = Array.from({ length: 14 }, (_, i) => [i + 1, `p${i + 1}`] as [number, string])
-    fetchPokemonIndex.mockResolvedValue(indexOf(entries))
+  it('surfaces a loadMoreError when a later batch loads but its detail calls fail', async () => {
+    backedBy(names(24))
     fetchPokemonDetail.mockImplementation((id: number) =>
       id <= 12 ? Promise.resolve(dto(id, `p${id}`)) : Promise.reject(new Error('offline')),
     )
@@ -131,51 +212,10 @@ describe('usePokemonList', () => {
     expect(result.state.value).toBe('ready')
     expect(result.loadMoreError.value).toBe(true)
     expect(result.items.value).toHaveLength(12)
-
-    fetchPokemonDetail.mockImplementation((id: number) => Promise.resolve(dto(id, `p${id}`)))
-    result.retry()
-    await flushPromises()
-
-    expect(result.loadMoreError.value).toBe(false)
-    expect(result.items.value).toHaveLength(14)
-  })
-
-  it('does not surface loadMoreError when only the first batch partially fails', async () => {
-    fetchPokemonIndex.mockResolvedValue(
-      indexOf(Array.from({ length: 12 }, (_, i) => [i + 1, `p${i + 1}`] as [number, string])),
-    )
-    fetchPokemonDetail.mockImplementation((id: number) =>
-      id <= 7 ? Promise.resolve(dto(id, `p${id}`)) : Promise.reject(new Error('offline')),
-    )
-
-    const { result } = mountComposable(() => usePokemonList())
-    await flushPromises()
-
-    // Nobody has clicked "Ver más" yet — a partial failure in the very
-    // first batch must not show the "couldn't load more" copy.
-    expect(result.state.value).toBe('ready')
-    expect(result.loadMoreError.value).toBe(false)
-    expect(result.items.value).toHaveLength(7)
-  })
-
-  it('goes to the full-page error state when nothing has ever loaded successfully', async () => {
-    fetchPokemonIndex.mockResolvedValue(indexOf([[1, 'bulbasaur']]))
-    fetchPokemonDetail.mockRejectedValue(new Error('offline'))
-
-    const { result } = mountComposable(() => usePokemonList())
-    await flushPromises()
-
-    expect(result.state.value).toBe('error')
-    expect(result.loadMoreError.value).toBe(false)
   })
 
   it('replaces the index-driven list with a union of type queries when filters are applied', async () => {
-    fetchPokemonIndex.mockResolvedValue(
-      indexOf([
-        [1, 'bulbasaur'],
-        [4, 'charmander'],
-      ]),
-    )
+    backedBy(names(24))
     const fireType: TypeDto = {
       name: 'fire',
       damage_relations: { double_damage_from: [], half_damage_from: [], no_damage_from: [] },

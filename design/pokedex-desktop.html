@@ -153,7 +153,7 @@
                 <button onClick="{{ d.go }}" style="width:{{ d.w }}; height:8px; border-radius:99px; border:none; cursor:pointer; background:{{ d.bg }}; transition:width .25s, background .25s;"></button>
               </sc-for>
             </div>
-            <p style="margin:0; font-size:13px; color:#8A919C;">Mostrando {{ shownCount }} de {{ totalCount }} Pokémon</p>
+            <p style="margin:0; font-size:13px; color:#8A919C;">Mostrando {{ shownCount }} Pokémones</p>
             <button onClick="{{ loadMore }}" style="display:{{ moreDisplay }}; padding:16px 42px; border:none; border-radius:99px; background:#2D8CF0; color:#fff; font-family:inherit; font-size:16px; font-weight:600; cursor:pointer; box-shadow:0 18px 30px -18px rgba(45,140,240,.9); transition:transform .22s, box-shadow .22s;" style-hover="transform:translateY(-3px); box-shadow:0 24px 38px -18px rgba(45,140,240,.95)">Ver más</button>
           </div>
         </sc-if>
@@ -220,8 +220,8 @@
 
         <sc-if value="{{ favIsEmpty }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:80px 0; animation:fadeUp .4s both;">
-            <div style="width:76px; height:68px; background-image:url(icons/favoritos.png); background-size:contain; background-repeat:no-repeat; background-position:center; opacity:.18; animation:floaty 3.4s ease-in-out infinite;"></div>
-            <h3 style="margin:4px 0 0; font-size:24px; font-weight:700;">Aún no tienes favoritos</h3>
+            <div style="width:76px; height:68px; background-image:url(src/assets/illustrations/error-state.png); background-size:contain; background-repeat:no-repeat; background-position:center; opacity:.18; animation:floaty 3.4s ease-in-out infinite;"></div>
+            <h3 style="margin:4px 0 0; font-size:24px; font-weight:700;">No has marcado ningún Pokémon como favorito</h3>
             <p style="margin:0; max-width:420px; text-align:center; font-size:15px; line-height:1.6; color:#6C737F;">Toca el corazón en cualquier Pokémon para guardarlo aquí y encontrarlo más rápido.</p>
             <button onClick="{{ goPokedex }}" style="margin-top:10px; padding:15px 38px; border:none; border-radius:99px; background:#2D8CF0; color:#fff; font-family:inherit; font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 18px 30px -18px rgba(45,140,240,.9);">Explorar Pokedex</button>
           </div>

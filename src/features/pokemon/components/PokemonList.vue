@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import errorIllustration from '@/assets/illustrations/error-state.png'
 import BaseSkeleton from '@/shared/ui/BaseSkeleton.vue'
 import BaseSpinner from '@/shared/ui/BaseSpinner.vue'
+import ErrorState from '@/shared/ui/ErrorState.vue'
 
 import { pokemonCopy } from '../copy'
 import type { PokemonListState } from '../composables/usePokemonList'
@@ -16,7 +16,6 @@ withDefaults(
     from?: 'pokedex' | 'favorites'
     /** Omit all pagination props to render as a flat, unpaginated grid (Favorites). */
     shownCount?: number
-    totalCount?: number
     hasMore?: boolean
     isLoadingMore?: boolean
     /** A later batch failed to load while earlier ones are still showing — not a full-page error. */
@@ -27,7 +26,6 @@ withDefaults(
   {
     from: 'pokedex',
     shownCount: 0,
-    totalCount: 0,
     hasMore: false,
     isLoadingMore: false,
     loadMoreError: false,
@@ -77,7 +75,7 @@ const emit = defineEmits<{ loadMore: []; retry: [] }>()
           />
         </div>
         <p class="text-sm text-ink-subtle">
-          {{ pokemonCopy.showingCount(shownCount ?? 0, totalCount ?? 0) }}
+          {{ pokemonCopy.showingCount(shownCount ?? 0) }}
         </p>
         <template v-if="loadMoreError">
           <p class="text-sm font-semibold text-accent">{{ pokemonCopy.loadMoreError }}</p>
@@ -105,22 +103,12 @@ const emit = defineEmits<{ loadMore: []; retry: [] }>()
       <slot name="empty" />
     </div>
 
-    <div
+    <ErrorState
       v-else-if="state === 'error'"
-      class="flex flex-col items-center justify-center gap-3 py-20 motion-safe:animate-[fade-up_0.4s_both]"
-    >
-      <img class="h-45 w-45 object-contain" :src="errorIllustration" alt="" />
-      <h3 class="mt-2 text-2xl font-bold">{{ pokemonCopy.errorTitle }}</h3>
-      <p class="max-w-md text-center text-base leading-relaxed text-ink-muted">
-        {{ pokemonCopy.errorDescription }}
-      </p>
-      <button
-        type="button"
-        class="mt-3 rounded-pill bg-brand px-11.5 py-4 font-sans text-base font-semibold text-white shadow-brand transition-transform duration-fast hover:-translate-y-0.5"
-        @click="emit('retry')"
-      >
-        {{ pokemonCopy.retry }}
-      </button>
-    </div>
+      :title="pokemonCopy.errorTitle"
+      :description="pokemonCopy.errorDescription"
+      :retry-label="pokemonCopy.retry"
+      @retry="emit('retry')"
+    />
   </div>
 </template>

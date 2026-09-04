@@ -2,9 +2,8 @@ export const favoritesCopy = {
   eyebrow: 'Tu colección',
   title: 'Favoritos',
   backToPokedex: 'Volver a Pokedex',
-  emptyTitle: 'Aún no tienes favoritos',
-  emptyDescription:
-    'Toca el corazón en cualquier Pokémon para guardarlo aquí y encontrarlo más rápido.',
+  emptyTitle: 'No has marcado ningún Pokémon como favorito',
+  emptyDescription: 'Haz clic en el ícono de corazón de tus Pokémon favoritos y aparecerán aquí.',
   exploreAction: 'Explorar Pokedex',
   confirmTitle: (name: string) => `¿Quitar a ${name} de favoritos?`,
   confirmDescription:

@@ -1,9 +1,8 @@
+import { formatDecimal } from '@/shared/utils/formatDecimal'
 import { formatPokemonNumber } from '@/shared/utils/pad'
 
 import type { PokemonDetail } from '../model/pokemon.model'
 import { TYPE_NAME_ES } from '../model/typeCopy'
-
-const formatDecimal = (value: number): string => value.toString().replace('.', ',')
 
 /**
  * Text copied to the clipboard by the detail page's share button: the

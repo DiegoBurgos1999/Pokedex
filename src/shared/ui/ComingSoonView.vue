@@ -2,6 +2,7 @@
 import { RouterLink } from 'vue-router'
 
 import comingSoonIllustration from '@/assets/illustrations/coming-soon.png'
+import { sharedCopy } from '@/shared/copy'
 
 defineProps<{ title: string }>()
 </script>
@@ -16,16 +17,15 @@ defineProps<{ title: string }>()
       :alt="title"
     />
     <h1 class="mt-3 text-4xl font-bold">{{ title }}</h1>
-    <p class="text-xl font-semibold text-brand">¡Muy pronto disponible!</p>
+    <p class="text-xl font-semibold text-brand">{{ sharedCopy.comingSoonBadge }}</p>
     <p class="max-w-md text-center text-md leading-relaxed text-ink-muted">
-      Estamos trabajando para traerte esta sección. Vuelve más adelante para descubrir todas las
-      novedades.
+      {{ sharedCopy.comingSoonDescription }}
     </p>
     <RouterLink
       to="/pokedex"
       class="mt-3 rounded-pill border border-border px-9 py-4 font-sans text-base font-semibold text-ink transition-colors duration-fast hover:border-brand hover:text-brand"
     >
-      Volver a Pokedex
+      {{ sharedCopy.comingSoonBackToPokedex }}
     </RouterLink>
   </div>
 </template>

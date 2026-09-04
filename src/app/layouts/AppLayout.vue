@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 
 import favoritosIcon from '@/assets/icons/favoritos.png'
+import houseIcon from '@/assets/icons/house.png'
 import perfilIcon from '@/assets/icons/perfil.png'
 import regionesIcon from '@/assets/icons/regiones.png'
 import RemoveFavoriteDialog from '@/features/favorites/components/RemoveFavoriteDialog.vue'
@@ -38,6 +39,27 @@ const isDexActive = computed(
 const isFavActive = computed(
   () => route.name === 'favorites' || (route.name === 'pokemon-detail' && cameFromFavorites.value),
 )
+
+interface NavItem {
+  to: string
+  label: string
+  icon: string
+  isActive: boolean
+  badge?: number
+}
+
+const navItems = computed<NavItem[]>(() => [
+  { to: '/pokedex', label: 'Pokedex', icon: houseIcon, isActive: isDexActive.value },
+  { to: '/regions', label: 'Regiones', icon: regionesIcon, isActive: route.name === 'regions' },
+  {
+    to: '/favorites',
+    label: 'Favoritos',
+    icon: favoritosIcon,
+    isActive: isFavActive.value,
+    badge: favoritesStore.count,
+  },
+  { to: '/profile', label: 'Perfil', icon: perfilIcon, isActive: route.name === 'profile' },
+])
 </script>
 
 <template>
@@ -79,88 +101,32 @@ const isFavActive = computed(
 
       <nav class="flex flex-col gap-2">
         <RouterLink
-          to="/pokedex"
+          v-for="item in navItems"
+          :key="item.to"
+          :to="item.to"
           class="flex items-center gap-3.5 rounded-md px-3.5 py-3.5 text-base font-semibold transition-colors duration-fast"
           :class="
-            isDexActive ? 'bg-brand-soft text-brand' : 'text-nav-inactive hover:bg-surface-sunken'
-          "
-        >
-          <span class="w-6 shrink-0 text-center text-lg">⌂</span>
-          <span
-            class="whitespace-nowrap transition-opacity duration-fast"
-            :class="collapsed ? 'opacity-0' : 'opacity-100'"
-            >Pokedex</span
-          >
-        </RouterLink>
-        <RouterLink
-          to="/regions"
-          class="flex items-center gap-3.5 rounded-md px-3.5 py-3.5 text-base font-semibold transition-colors duration-fast"
-          :class="
-            route.name === 'regions'
-              ? 'bg-brand-soft text-brand'
-              : 'text-nav-inactive hover:bg-surface-sunken'
+            item.isActive ? 'bg-brand-soft text-brand' : 'text-nav-inactive hover:bg-surface-sunken'
           "
         >
           <span
             class="h-5 w-6 shrink-0 bg-contain bg-center bg-no-repeat"
-            :style="{ backgroundImage: `url(${regionesIcon})` }"
+            :style="{ backgroundImage: `url(${item.icon})` }"
           />
           <span
             class="whitespace-nowrap transition-opacity duration-fast"
             :class="collapsed ? 'opacity-0' : 'opacity-100'"
-            >Regiones</span
-          >
-        </RouterLink>
-        <RouterLink
-          to="/favorites"
-          class="flex items-center gap-3.5 rounded-md px-3.5 py-3.5 text-base font-semibold transition-colors duration-fast"
-          :class="
-            isFavActive ? 'bg-brand-soft text-brand' : 'text-nav-inactive hover:bg-surface-sunken'
-          "
-        >
-          <span
-            class="h-5 w-6 shrink-0 bg-contain bg-center bg-no-repeat"
-            :style="{ backgroundImage: `url(${favoritosIcon})` }"
-          />
-          <span
-            class="whitespace-nowrap transition-opacity duration-fast"
-            :class="collapsed ? 'opacity-0' : 'opacity-100'"
-            >Favoritos</span
+            >{{ item.label }}</span
           >
           <span
+            v-if="item.badge !== undefined"
             class="ml-auto rounded-pill bg-accent px-2.5 py-0.5 text-xs font-bold text-white transition-opacity duration-fast"
             :class="collapsed ? 'opacity-0' : 'opacity-100'"
           >
-            {{ favoritesStore.count }}
+            {{ item.badge }}
           </span>
         </RouterLink>
-        <RouterLink
-          to="/profile"
-          class="flex items-center gap-3.5 rounded-md px-3.5 py-3.5 text-base font-semibold transition-colors duration-fast"
-          :class="
-            route.name === 'profile'
-              ? 'bg-brand-soft text-brand'
-              : 'text-nav-inactive hover:bg-surface-sunken'
-          "
-        >
-          <span
-            class="h-5 w-6 shrink-0 bg-contain bg-center bg-no-repeat"
-            :style="{ backgroundImage: `url(${perfilIcon})` }"
-          />
-          <span
-            class="whitespace-nowrap transition-opacity duration-fast"
-            :class="collapsed ? 'opacity-0' : 'opacity-100'"
-            >Perfil</span
-          >
-        </RouterLink>
       </nav>
-
-      <div v-if="!collapsed" class="mt-auto rounded-lg bg-surface-muted p-4">
-        <p class="mb-1.5 text-sm font-bold">Datos de PokéAPI</p>
-        <p class="text-xs leading-relaxed text-ink-muted">
-          151 Pokémon de la primera generación disponibles.
-        </p>
-      </div>
     </aside>
 
     <main ref="main" class="relative flex-1 overflow-y-auto pb-22" @scroll="onScroll">

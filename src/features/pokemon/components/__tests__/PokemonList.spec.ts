@@ -49,10 +49,9 @@ describe('PokemonList', () => {
       pageCount: 3,
       page: 1,
       shownCount: 12,
-      totalCount: 30,
       hasMore: true,
     })
-    expect(paginated.text()).toContain('Mostrando 12 de 30 Pokémon')
+    expect(paginated.text()).toContain('Mostrando 12 Pokémones')
     expect(paginated.text()).toContain('Ver más')
 
     const flat = mountList({ state: 'ready', items: [bulbasaur] })

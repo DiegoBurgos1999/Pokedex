@@ -2,11 +2,12 @@
 import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
-import errorIllustration from '@/assets/illustrations/error-state.png'
 import FavoriteButton from '@/features/favorites/components/FavoriteButton.vue'
 import BaseCard from '@/shared/ui/BaseCard.vue'
 import BaseSkeleton from '@/shared/ui/BaseSkeleton.vue'
+import ErrorState from '@/shared/ui/ErrorState.vue'
 import TypeChip from '@/shared/ui/TypeChip.vue'
+import { formatDecimal } from '@/shared/utils/formatDecimal'
 import { formatPokemonNumber } from '@/shared/utils/pad'
 
 import ShareButton from '../components/ShareButton.vue'
@@ -34,6 +35,8 @@ const summary = computed(() =>
 const heroGradient = computed(() =>
   detail.value ? getTypeGradient(detail.value.types[0] ?? 'normal') : undefined,
 )
+
+const femalePercent = computed(() => ((detail.value?.genderRate ?? 0) / 8) * 100)
 </script>
 
 <template>
@@ -53,23 +56,13 @@ const heroGradient = computed(() =>
       <BaseSkeleton class="h-[420px] rounded-3xl" />
     </div>
 
-    <div
+    <ErrorState
       v-else-if="state === 'error'"
-      class="flex flex-col items-center justify-center gap-3 py-20"
-    >
-      <img class="h-45 w-45 object-contain" :src="errorIllustration" alt="" />
-      <h3 class="text-2xl font-bold">{{ pokemonCopy.errorTitle }}</h3>
-      <p class="max-w-md text-center text-base leading-relaxed text-ink-muted">
-        {{ pokemonCopy.errorDescription }}
-      </p>
-      <button
-        type="button"
-        class="mt-3 rounded-pill bg-brand px-11.5 py-4 font-sans text-base font-semibold text-white shadow-brand"
-        @click="retry"
-      >
-        {{ pokemonCopy.retry }}
-      </button>
-    </div>
+      :title="pokemonCopy.errorTitle"
+      :description="pokemonCopy.errorDescription"
+      :retry-label="pokemonCopy.retry"
+      @retry="retry"
+    />
 
     <div
       v-else-if="detail"
@@ -123,16 +116,14 @@ const heroGradient = computed(() =>
               ⚖ {{ pokemonCopy.weight }}
             </p>
             <BaseCard class="text-xl font-semibold"
-              >{{ detail.weightKg.toString().replace('.', ',') }} kg</BaseCard
+              >{{ formatDecimal(detail.weightKg) }} kg</BaseCard
             >
           </div>
           <div>
             <p class="mb-2 text-xs font-semibold tracking-eyebrow text-ink-subtle">
               ↕ {{ pokemonCopy.height }}
             </p>
-            <BaseCard class="text-xl font-semibold"
-              >{{ detail.heightM.toString().replace('.', ',') }} m</BaseCard
-            >
+            <BaseCard class="text-xl font-semibold">{{ formatDecimal(detail.heightM) }} m</BaseCard>
           </div>
           <div>
             <p class="mb-2 text-xs font-semibold tracking-eyebrow text-ink-subtle">
@@ -155,12 +146,12 @@ const heroGradient = computed(() =>
           <div class="flex h-2.5 overflow-hidden rounded-pill bg-gender-female">
             <div
               class="bg-gender-male transition-[width] duration-slow ease-out-expo"
-              :style="{ width: `${(detail.genderRate / 8) * 100}%` }"
+              :style="{ width: `${femalePercent}%` }"
             />
           </div>
           <div class="mt-2 flex justify-between text-sm text-ink-secondary">
-            <span>♂ {{ (100 - (detail.genderRate / 8) * 100).toString().replace('.', ',') }}%</span>
-            <span>♀ {{ ((detail.genderRate / 8) * 100).toString().replace('.', ',') }}%</span>
+            <span>♂ {{ formatDecimal(100 - femalePercent) }}%</span>
+            <span>♀ {{ formatDecimal(femalePercent) }}%</span>
           </div>
         </div>
 

@@ -10,6 +10,7 @@ import PokemonSearchAndFilter from '@/features/pokemon/components/PokemonSearchA
 import type { PokemonListState } from '@/features/pokemon/composables/usePokemonList'
 import { usePokemonSearch } from '@/features/pokemon/composables/usePokemonSearch'
 import type { PokemonType } from '@/features/pokemon/model/pokemonTypeTheme'
+import { matchesPokemonQuery } from '@/features/pokemon/utils/matchesPokemonQuery'
 
 import FavoritesEmptyState from '../components/FavoritesEmptyState.vue'
 import { favoritesCopy } from '../copy'
@@ -24,8 +25,7 @@ const showFilters = ref(false)
 const filteredFavorites = computed(() => {
   const q = debouncedQuery.value.trim().toLowerCase()
   return store.favorites.filter((pokemon) => {
-    const matchesQuery =
-      !q || pokemon.name.toLowerCase().includes(q) || String(pokemon.id).includes(q)
+    const matchesQuery = !q || matchesPokemonQuery(pokemon, q)
     const matchesType =
       applied.value.length === 0 || pokemon.types.some((type) => applied.value.includes(type))
     return matchesQuery && matchesType

@@ -49,14 +49,6 @@ describe('useFavoritesStore', () => {
     expect(store.favorites).toEqual([pikachu])
   })
 
-  it('toggles a favorite on and off', () => {
-    const store = useFavoritesStore()
-    store.toggleFavorite(pikachu)
-    expect(store.isFavorite(25)).toBe(true)
-    store.toggleFavorite(pikachu)
-    expect(store.isFavorite(25)).toBe(false)
-  })
-
   it('removes only after the pending removal is confirmed', () => {
     const store = useFavoritesStore()
     store.addFavorite(pikachu)

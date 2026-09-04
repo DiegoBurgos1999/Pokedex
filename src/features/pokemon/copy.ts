@@ -4,7 +4,7 @@ export const pokemonCopy = {
   searchPlaceholder: 'Buscar Pókemon...',
   filters: 'Filtros',
   loadMore: 'Ver más',
-  showingCount: (shown: number, total: number) => `Mostrando ${shown} de ${total} Pokémon`,
+  showingCount: (shown: number) => `Mostrando ${shown} Pokémones`,
   emptyTitle: 'No encontramos Pokémon',
   emptyDescription: 'Prueba con otro nombre o quita algunos filtros para ampliar la búsqueda.',
   clearSearch: 'Limpiar búsqueda',

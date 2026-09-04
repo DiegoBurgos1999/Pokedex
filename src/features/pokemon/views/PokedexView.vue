@@ -18,7 +18,6 @@ const {
   state,
   items,
   shownCount,
-  totalCount,
   hasMore,
   isLoadingMore,
   loadMoreError,
@@ -71,7 +70,6 @@ const onApplyFilters = (types: PokemonType[]): void => {
         :state="state"
         :items="items"
         :shown-count="shownCount"
-        :total-count="totalCount"
         :has-more="hasMore"
         :is-loading-more="isLoadingMore"
         :load-more-error="loadMoreError"
